@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a><img src="https://github.com/0ffAlexis/0ffalexis.github.io/blob/main/Assets/logo_red.jpg" alt="TormentICO" width="100"></a>
+  <a><img src="https://github.com/0ffAlexis/0ffalexis.github.io/blob/main/Assets/logo_red.jpg" alt="TormentICO" width="200" height="200"></a>
   <br>
   Project: 0ffAlexis's Site
   <br>
