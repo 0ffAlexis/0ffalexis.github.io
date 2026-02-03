@@ -1,7 +1,7 @@
 <h1 align="center">
-  <a><img src="https://pack.ultrasmp.online/assets/omega-icon.png" alt="OmegaICO" width="100"></a>
+  <a><img src="https://github.com/0ffAlexis/0ffalexis.github.io/blob/main/Assets/logo_red.jpg" alt="TormentICO" width="100"></a>
   <br>
-  Project: Andr3wOnTilt's Site
+  Project: 0ffAlexis's Site
   <br>
   <br>
   
