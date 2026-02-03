@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "id": "hardwin_royal_warrior",
+    "entity": "Royal Warrior",
+    "humanName": "Hardwin",
+    "portrait": "entity.jpg",
+    "locale": "it-IT",
+    "lastUpdated": "2026-02-03",
+    "notes": "File separato readme.json — non contiene informazioni di stile (colori/font)."
+  },
+  "layout": {
+    "leftColumn": ["portrait", "stats", "lore"],
+    "rightColumn": ["attacks", "abilities", "entities"]
+  },
+  "stats": {
+    "vita": 4000,
+    "energie": 190,
+    "livelloInvisibilita": 5,
+    "velocita": 24,
+    "armatura": 0,
+    "armaturaMagica": 0,
+    "crit": 0,
+    "resistenze": {
+      "fuoco": 0,
+      "gelo": 0,
+      "elettrico": 0
+    }
+  },
+  "attacks": [
+    {
+      "group": "Executions",
+      "items": [
+        {
+          "key": "exec_instant",
+          "name": "Instant",
+          "desc": "Execution - colpo immediato",
+          "damage": 500,
+          "energyCost": 5,
+          "notes": "colpo singolo istantaneo"
+        },
+        {
+          "key": "exec_charged",
+          "name": "Charged",
+          "desc": "Execution caricato",
+          "damage": 750,
+          "energyCost": 8
+        },
+        {
+          "key": "exec_final_verdict",
+          "name": "Final Verdict",
+          "desc": "20% in più rispetto alla Charged",
+          "damage": 900,
+          "energyCost": 10
+        },
+        {
+          "key": "exec_last_judgment",
+          "name": "Last Judgment",
+          "desc": "30% in più rispetto alla Charged",
+          "damage": 975,
+          "energyCost": 12
+        }
+      ]
+    },
+    {
+      "group": "Slash",
+      "items": [
+        {
+          "key": "slash_instant",
+          "name": "Instant",
+          "desc": "Slash - colpo rapido",
+          "damage": 600,
+          "energyCost": 7
+        },
+        {
+          "key": "slash_charged",
+          "name": "Charged",
+          "desc": "Slash caricato",
+          "damage": 900,
+          "energyCost": 9
+        },
+        {
+          "key": "slash_end_of_mercy",
+          "name": "End Of Mercy",
+          "desc": "20% in più rispetto alla Charged",
+          "damage": 1080,
+          "energyCost": 9
+        },
+        {
+          "key": "slash_mercys_oblivion",
+          "name": "Mercy's Oblivion",
+          "desc": "30% in più rispetto alla Charged",
+          "damage": 1170,
+          "energyCost": 15
+        }
+      ]
+    }
+  ],
+  "abilities": [
+    {
+      "key": "switch",
+      "name": "Switch",
+      "desc": "Cambio rapido",
+      "damage": null,
+      "energyCost": 10
+    },
+    {
+      "key": "eternal_hope",
+      "name": "Eternal Hope",
+      "desc": "1 Time For Totem — ripristino",
+      "effects": {
+        "healthPercent": 60,
+        "energyPercent": 60
+      }
+    }
+  ],
+  "entities": [
+    {
+      "key": "vfx_entity",
+      "displayName": "VFX",
+      "summonCommand": "/summon vfx ~ ~ ~ {CustomName:\"VFX\"}",
+      "notes": "esempio di entità usata per VFX/attacchi"
+    }
+  ]
+}

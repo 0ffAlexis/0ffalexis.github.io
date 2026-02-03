@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8" />
+    <title>Royal Warrior — Hardwin</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- link esterno al CSS (da sviluppare dopo) -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Back -->
+    <a class="back-button is-link" href="../index.html">← Indietro</a>
+
+    <!-- Rift (decorative) -->
+    <div class="rift" aria-hidden="true">
+        <div class="rift-line main"></div>
+    </div>
+
+    <main class="container" role="main" aria-labelledby="entity-title">
+
+        <!-- LEFT column (title, human name, image, stats, lore) -->
+        <section class="left-col">
+            <header class="left-header">
+                <h1 id="entity-title" class="entity-title">Royal Warrior</h1>
+                <div class="entity-human">Hardwin</div>
+            </header>
+
+            <figure class="portrait">
+                <!-- ritratto: verrà impostato da readme.json -->
+                <img id="portrait-img" src="entity.jpg" alt="Royal Warrior — ritratto" class="entity-image" />
+            </figure>
+
+            <div class="card card-left" aria-labelledby="stats-title">
+                <h2 id="stats-title" class="card-title">Statistiche</h2>
+
+                <div class="stats-list" role="list" id="stats-list">
+                    <!-- popolato da readme.json -->
+                </div>
+
+                <h3 class="card-subtitle">Lore</h3>
+                <div class="lore" id="lore">
+                    <!-- popolato da readme.json -->
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT column (attacks) -->
+        <aside class="right-col">
+            <div class="card card-right" aria-labelledby="attacks-title">
+                <h2 id="attacks-title" class="card-title">Attacks</h2>
+
+                <div class="attacks-grid" id="attacks-grid">
+                    <!-- popolato da readme.json -->
+                </div>
+
+                <!-- Other abilities below attacks -->
+                <div class="other-abilities" id="abilities-wrap" style="margin-top:12px;"></div>
+
+            </div>
+        </aside>
+
+    </main>
+
+<script>
+/* Carica readme.json dalla stessa cartella e popola la pagina. 
+   readme.json è obbligatorio — se manca verrà mostrato un warning in console.
+*/
+(async function(){
+  async function loadJSON(path){
+    try{
+      const r = await fetch(path, { cache: 'no-store' });
+      if(!r.ok) throw new Error('fetch failed');
+      return await r.json();
+    }catch(e){
+      console.warn('readme.json non trovato:', e);
+      return null;
+    }
+  }
+
+  const data = await loadJSON('readme.json');
+  if(!data) return;
+
+  function toLabel(k){ return String(k).replace(/([A-Z])/g,' $1').replace(/_/g,' ').replace(/^./,s=>s.toUpperCase()); }
+
+  // meta
+  if(data.meta){
+    if(data.meta.entity) document.getElementById('entity-title').textContent = data.meta.entity;
+    if(data.meta.humanName) document.querySelector('.entity-human').textContent = data.meta.humanName;
+    if(data.meta.portrait) document.getElementById('portrait-img').src = data.meta.portrait;
+  }
+
+  // lore
+  if(data.lore) document.getElementById('lore').textContent = data.lore;
+
+  // stats
+  (function(){
+    const sWrap = document.getElementById('stats-list'); sWrap.innerHTML = '';
+    const s = data.stats || {};
+    for(const key of Object.keys(s)){
+      const row = document.createElement('div'); row.className='stat'; row.setAttribute('role','listitem');
+      const lbl = document.createElement('div'); lbl.className='label'; lbl.textContent = toLabel(key);
+      const val = document.createElement('div'); val.className='value'; val.textContent = (s[key] === null || s[key] === undefined) ? '—' : s[key];
+      row.appendChild(lbl); row.appendChild(val); sWrap.appendChild(row);
+    }
+  })();
+
+  // attacks
+  (function(){
+    const grid = document.getElementById('attacks-grid'); grid.innerHTML = '';
+    const groups = data.attacks || [];
+    for(const g of groups){
+      const col = document.createElement('div'); col.className='attacks-col';
+      const h = document.createElement('h3'); h.className='attack-group-title'; h.textContent = g.group || 'Group'; col.appendChild(h);
+      for(const it of (g.items||[])){
+        const a = document.createElement('div'); a.className='attack';
+        const meta = document.createElement('div'); meta.className='meta';
+        const name = document.createElement('div'); name.className='name'; name.textContent = it.name || '—';
+        const desc = document.createElement('div'); desc.className='desc muted'; desc.textContent = it.desc || '';
+        meta.appendChild(name); meta.appendChild(desc);
+        const nums = document.createElement('div'); nums.className='numbers';
+        const dmg = document.createElement('div'); dmg.className='dmg'; dmg.textContent = 'Danno: ' + (it.damage ?? '—');
+        const cost = document.createElement('div'); cost.className='cost'; cost.textContent = 'Energia: ' + (it.energyCost ?? '—');
+        nums.appendChild(dmg); nums.appendChild(cost);
+        a.appendChild(meta); a.appendChild(nums);
+        col.appendChild(a);
+      }
+      grid.appendChild(col);
+    }
+  })();
+
+  // abilities
+  (function(){
+    const wrap = document.getElementById('abilities-wrap'); wrap.innerHTML = '';
+    const list = data.abilities || [];
+    if(list.length){
+      const title = document.createElement('h3'); title.className='attack-group-title'; title.textContent='Other Abilities'; wrap.appendChild(title);
+      for(const ab of list){
+        const a = document.createElement('div'); a.className='attack';
+        const meta = document.createElement('div'); meta.className='meta';
+        const name = document.createElement('div'); name.className='name'; name.textContent = ab.name || '—';
+        const desc = document.createElement('div'); desc.className='desc muted'; desc.textContent = ab.desc || '';
+        meta.appendChild(name); meta.appendChild(desc);
+        const nums = document.createElement('div'); nums.className='numbers';
+        const dmg = document.createElement('div'); dmg.className='dmg'; dmg.textContent = (ab.damage != null) ? ('Danno: ' + ab.damage) : 'Danno: —';
+        const cost = document.createElement('div'); cost.className='cost'; cost.textContent = (ab.energyCost != null) ? ('Energia: ' + ab.energyCost) : '';
+        nums.appendChild(dmg); if(cost.textContent) nums.appendChild(cost);
+        a.appendChild(meta); a.appendChild(nums); wrap.appendChild(a);
+      }
+    }
+  })();
+
+  // layout: simple reordering by keys (leftColumn, rightColumn)
+  if(data.layout && typeof data.layout === 'object'){
+    try{
+      const left = document.querySelector('.left-col'); const right = document.querySelector('.right-col');
+      const map = {
+        portrait: () => document.querySelector('.portrait')?.closest('.card') || document.querySelector('.portrait'),
+        stats: () => document.querySelector('#stats-list')?.closest('.card'),
+        lore: () => document.querySelector('#lore')?.closest('.card'),
+        attacks: () => document.querySelector('#attacks-grid')?.closest('.card'),
+        abilities: () => document.querySelector('#abilities-wrap')?.closest('.card')
+      };
+      (data.layout.leftColumn || []).forEach(k=>{ const n = map[k] && map[k](); if(n && n.parentNode !== left) left.appendChild(n); });
+      (data.layout.rightColumn || []).forEach(k=>{ const n = map[k] && map[k](); if(n && n.parentNode !== right) right.appendChild(n); });
+    }catch(e){ /* ignore */ }
+  }
+
+})();
+</script>
+
+<script>
+/* Micro fade-out before navigation */
+(function(){
+    const CLICK_DELAY = 360;
+    function attachFade(a){
+        a.addEventListener('click', function(e){
+            const href = a.getAttribute('href');
+            if(!href || href.startsWith('#')) return;
+            e.preventDefault();
+            if(document.body.classList.contains('page-fade-out')) return;
+            document.body.classList.add('page-fade-out');
+            setTimeout(()=> { window.location.href = href; }, CLICK_DELAY);
+        });
+    }
+    document.querySelectorAll('a.is-link, a.back-button').forEach(attachFade);
+})();
+</script>
+
+</body>
+</html>

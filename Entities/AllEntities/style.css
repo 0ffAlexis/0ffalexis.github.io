@@ -1,0 +1,224 @@
+/* =========================
+   RESET & BASE
+   ========================= */
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+
+:root{
+    --bg-1: #000000;
+    --bg-2: #0f0f0f;
+    --bg-3: #2a2a2a;
+}
+
+/* Background generale */
+body {
+    height:100vh;
+    background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 45%, var(--bg-3) 100%);
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+}
+
+/* =========================
+   BACK (PULSANTE)
+   ========================= */
+.back-button{
+    position:absolute;
+    top:20px;
+    left:20px;
+    padding:10px 18px;
+    background: linear-gradient(145deg,#0f0f0f,#2a2a2a);
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.06);
+    color:#f2f2f2;
+    font-weight:700;
+    text-decoration:none;
+    box-shadow:0 0 10px rgba(255,255,255,0.06);
+    transition: transform .22s ease, box-shadow .22s ease;
+    z-index:12;
+}
+.back-button:hover{ transform:scale(1.03); box-shadow:0 0 18px rgba(255,255,255,0.12); }
+
+/* =========================
+   LAYOUT MENU
+   ========================= */
+.menu-page-container{
+    display:flex;
+    flex-direction:row;
+    justify-content:space-around;
+    align-items:flex-start;
+    width:100%;
+    max-width:1200px;
+    position:relative;
+    top:-120px;
+    padding:0 50px;
+    z-index:10;
+}
+
+/* =========================
+   MENU: STILE BASE
+   ========================= */
+.menu-container{
+    width:320px;
+    height:100px;
+    background: rgba(0,0,0,0.6);
+    border-radius:30px;
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:visible;
+    transition: transform .28s cubic-bezier(.2,.9,.3,1);
+    will-change: transform, opacity;
+
+    /* ingresso */
+    opacity:0;
+    transform: translateY(40px);
+    animation-name: menuFadeUp;
+    animation-duration: 1.0s;
+    animation-timing-function: cubic-bezier(.22,.9,.32,1);
+    animation-fill-mode: both;
+}
+
+/* Se il container è un anchor (clickable), assicurati che si comporti come blocco flessibile */
+.menu-container.is-link{
+    text-decoration:none;
+    color:inherit;
+    cursor:pointer;
+    display:flex;             /* sovrascrive il comportamento inline degli <a> */
+    justify-content:center;
+    align-items:center;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+/* focus accessibile */
+.menu-container.is-link:focus {
+    box-shadow: 0 0 0 4px rgba(0,200,255,0.06), 0 8px 30px rgba(0,0,0,0.6);
+}
+
+/* pulsante interno */
+.menu-button{
+    width:85%;
+    padding:20px;
+    text-align:center;
+    border-radius:18px;
+    background: rgba(0,0,0,0.45);
+    color:#f2f2f2;
+    font-size:18px;
+    font-weight:700;
+    letter-spacing:1px;
+    cursor:pointer;
+    border:2px solid transparent;
+    box-shadow:0 6px 18px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.02);
+    transition: transform .22s ease, box-shadow .22s ease;
+}
+.menu-button:hover{ transform: scale(1.05); }
+
+/* =========================
+   PSEUDO-ELEMENTI BORDI/GLOW
+   ========================= */
+.menu-container::before,
+.menu-container::after{
+    content:"";
+    position:absolute;
+    border-radius:33px;
+    pointer-events:none;
+}
+
+/* esterno: gradient + glow animato */
+.menu-container::before{
+    top:-6px; left:-6px; right:-6px; bottom:-6px;
+    z-index:-2;
+    padding:6px;
+    background-size:200% 200%;
+    box-shadow: 0 0 25px rgba(0,0,0,0.15);
+    animation: borderGradientShift 5s linear infinite;
+}
+
+/* interno: bordo meno saturo */
+.menu-container::after{
+    inset:8px;
+    z-index:-1;
+    border-radius:24px;
+    border:2px solid rgba(255,255,255,0.06);
+}
+
+/* =========================
+   VARIANTI COLORATE
+   ========================= */
+
+/* Hunters (rosso) */
+.menu-container.hunters::before{
+    background: linear-gradient(135deg, rgba(255,0,0,0.18), rgba(139,0,0,0.12));
+    box-shadow: 0 0 28px rgba(255,0,0,0.18), 0 0 60px rgba(255,0,0,0.08);
+}
+.menu-container.hunters::after{ border-color: rgba(255,0,0,0.18); }
+.menu-container.hunters .menu-button{ border-color: rgba(255,0,0,0.45); box-shadow:0 10px 30px rgba(255,0,0,0.06); }
+
+/* Vanquishers (azzurro/ciano) */
+.menu-container.vanquishers::before{
+    background: linear-gradient(135deg, rgba(0,255,255,0.18), rgba(135,206,250,0.12));
+    box-shadow: 0 0 28px rgba(0,255,255,0.18), 0 0 60px rgba(0,255,255,0.08);
+}
+.menu-container.vanquishers::after{ border-color: rgba(0,255,255,0.18); }
+.menu-container.vanquishers .menu-button{ border-color: rgba(0,255,255,0.45); box-shadow:0 10px 30px rgba(0,255,255,0.06); }
+
+/* Guardians (gold) */
+.menu-container.guardians::before{
+    background: linear-gradient(135deg, rgba(255,215,0,0.16), rgba(255,255,102,0.10));
+    box-shadow: 0 0 28px rgba(255,215,0,0.16), 0 0 60px rgba(255,215,0,0.06);
+}
+.menu-container.guardians::after{ border-color: rgba(255,215,0,0.16); }
+.menu-container.guardians .menu-button{ border-color: rgba(255,215,0,0.45); box-shadow:0 10px 30px rgba(255,215,0,0.05); }
+
+/* Hover glow più forte */
+.menu-container.vanquishers:hover::before{ box-shadow:0 0 48px rgba(0,255,255,0.26); }
+.menu-container.hunters:hover::before{ box-shadow:0 0 48px rgba(255,0,0,0.26); }
+.menu-container.guardians:hover::before{ box-shadow:0 0 48px rgba(255,215,0,0.22); }
+
+/* =========================
+   DELAY ANIMAZIONE (sequenza)
+   ========================= */
+.menu-container.hunters { animation-delay: 0.18s; }
+.menu-container.vanquishers { animation-delay: 0.42s; }
+.menu-container.guardians { animation-delay: 0.68s; }
+
+/* =========================
+   FRATTURA
+   ========================= */
+.rift { position:absolute; inset:-50%; pointer-events:none; z-index:1; }
+.rift-line { position:absolute; width:220%; transform:rotate(-45deg); bottom:-40%; right:-60%; background-size:300% 100%; animation: riftMove 7s linear infinite; }
+.rift-line.main {
+    height:6px;
+    background: linear-gradient(90deg, transparent, #ffffff, #e5e5e5, #bfbfbf, #e5e5e5, #ffffff, transparent);
+    box-shadow: 0 0 30px rgba(255,255,255,0.9), 0 0 60px rgba(200,200,200,0.6);
+    filter: blur(.6px);
+    animation: riftMove 7s linear infinite, corruptionPulse 2.5s ease-in-out infinite;
+}
+
+/* =========================
+   KEYFRAMES
+   ========================= */
+@keyframes menuFadeUp {
+    0% { opacity:0; transform: translateY(40px); }
+    60% { opacity:1; transform: translateY(-8px); }
+    100% { opacity:1; transform: translateY(0); }
+}
+
+@keyframes borderGradientShift {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+}
+
+@keyframes riftMove {
+    0% { transform: translate(0,0) rotate(-45deg); opacity:0; }
+    10% { opacity:1; }
+    100% { transform: translate(-55%,-55%) rotate(-45deg); opacity:0; }
+}
+@keyframes corruptionPulse {
+    0% { background-position: 0% 50%; filter: blur(0.6px); }
+    100% { background-position: 300% 50%; filter: blur(1.2px); }
+}

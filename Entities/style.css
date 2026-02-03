@@ -1,0 +1,252 @@
+/* Reset base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Background generale */
+body {
+    height: 100vh;
+    background: linear-gradient(
+        135deg,
+        #000000 0%,
+        #0f0f0f 45%,
+        #2a2a2a 100%
+    );
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* =========================
+   MENU CENTRALE
+   ========================= */
+
+.menu-container {
+    width: 320px;
+    height: 320px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 30px;
+    position: relative;
+    border: 2px solid rgba(220, 220, 220, 0.9);
+    box-shadow:
+        0 0 30px rgba(255, 255, 255, 0.35),
+        inset 0 0 25px rgba(255, 255, 255, 0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    z-index: 10;
+    overflow: hidden;
+
+    /* 🔥 NUOVO */
+    opacity: 0;
+    animation: menuFadeUp 1.2s ease-out forwards;
+}
+
+/* bordo interno luminoso */
+.menu-container::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    pointer-events: none;
+}
+
+/* =========================
+   PULSANTI
+   ========================= */
+
+.menu-button {
+    width: 85%;
+    padding: 20px;
+    text-align: center;
+    background: linear-gradient(
+        145deg,
+        #0f0f0f,
+        #2a2a2a
+    );
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    color: #f2f2f2;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.25);
+}
+
+.menu-button:hover {
+    background: linear-gradient(
+        145deg,
+        #2a2a2a,
+        #444444
+    );
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    transform: scale(1.05);
+}
+
+/* =========================
+   FRATTURA VIVENTE (ENTITÀ)
+   ========================= */
+
+.rift {
+    position: absolute;
+    inset: -50%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.rift-line {
+    position: absolute;
+    width: 220%;
+    transform: rotate(-45deg);
+    bottom: -40%;
+    right: -60%;
+    background-size: 300% 100%;
+    animation: riftMove 7s linear infinite;
+}
+
+/* Linea principale (cuore) */
+.rift-line.main {
+    height: 6px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #ffffff,
+        #e5e5e5,
+        #bfbfbf,
+        #e5e5e5,
+        #ffffff,
+        transparent
+    );
+    box-shadow:
+        0 0 30px rgba(255, 255, 255, 0.9),
+        0 0 60px rgba(200, 200, 200, 0.6);
+    filter: blur(0.6px);
+    animation:
+        riftMove 7s linear infinite,
+        corruptionPulse 2.5s ease-in-out infinite;
+}
+
+/* Sdoppiamento / frattura */
+.rift-line.split {
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #ffffff,
+        #bfbfbf,
+        transparent
+    );
+    opacity: 0.7;
+    transform: rotate(-45deg) translateY(-18px);
+    animation:
+        riftMove 7s linear infinite,
+        splitJitter 1.8s infinite alternate;
+}
+
+/* Scia residua */
+.rift-line.trail {
+    height: 10px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.18),
+        rgba(255, 255, 255, 0.06),
+        transparent
+    );
+    filter: blur(8px);
+    opacity: 0.6;
+    animation: riftTrail 7s linear infinite;
+}
+
+/* =========================
+   REAZIONE AL MENU (HOVER)
+   ========================= */
+
+.menu-container:hover ~ .rift .rift-line.main {
+    box-shadow:
+        0 0 60px rgba(255, 255, 255, 1),
+        0 0 120px rgba(220, 220, 220, 0.9);
+    filter: blur(1.2px);
+}
+
+.menu-container:hover ~ .rift .rift-line.split {
+    opacity: 1;
+}
+
+.menu-container:hover ~ .rift .rift-line.trail {
+    opacity: 0.9;
+}
+
+/* =========================
+   ANIMAZIONI
+   ========================= */
+
+@keyframes riftMove {
+    0% {
+        transform: translate(0, 0) rotate(-45deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-55%, -55%) rotate(-45deg);
+        opacity: 0;
+    }
+}
+
+@keyframes corruptionPulse {
+    0% {
+        background-position: 0% 50%;
+        filter: blur(0.6px);
+    }
+    100% {
+        background-position: 300% 50%;
+        filter: blur(1.2px);
+    }
+}
+
+@keyframes splitJitter {
+    0% {
+        transform: rotate(-45deg) translateY(-12px);
+    }
+    100% {
+        transform: rotate(-45deg) translateY(-22px);
+    }
+}
+
+@keyframes riftTrail {
+    0% {
+        transform: translate(10%, 10%) rotate(-45deg);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.5;
+    }
+    100% {
+        transform: translate(-45%, -45%) rotate(-45deg);
+        opacity: 0;
+    }
+
+}
+
+@keyframes menuFadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

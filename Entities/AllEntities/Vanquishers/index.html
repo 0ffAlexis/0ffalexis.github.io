@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Tutte le Entità Registrate</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Pulsante Indietro -->
+    <a href="../index.html" class="back-button">← Indietro</a>
+
+    <!-- Frattura vivente / Entità -->
+    <div class="rift">
+        <div class="rift-line main"></div>
+    </div>
+
+    <!-- Container principale menu (6 items) -->
+    <div class="menu-page-container">
+
+        <div class="menu-card ancient">
+            <div class="menu-icon" aria-hidden="true"></div>
+            <a href="../Vanquishers/AncientEmperor/index.html" class="menu-container hunters is-link" role="link" aria-label="Ancient Emperor">
+                <div class="menu-button">Ancient Emperor</div>
+            </a>
+        </div>
+
+        <div class="menu-card godlike">
+            <div class="menu-icon" aria-hidden="true"></div>
+            <a href="../Vanquishers/Godlike/Vanquisher/index.html" class="menu-container vanquishers is-link" role="link" aria-label="Godlike Vanquisher">
+                <div class="menu-button">Godlike Vanquisher</div>
+            </a>
+        </div>
+
+        <div class="menu-card first-blue">
+            <div class="menu-icon" aria-hidden="true"></div>
+            <a href="../Vanquishers/FirstVanquisher/index.html" class="menu-container first is-link" role="link" aria-label="First Vanquisher">
+                <div class="menu-button">First Vanquisher</div>
+            </a>
+        </div>
+
+        <div class="menu-card first-goddess">
+            <div class="menu-icon" aria-hidden="true"></div>
+            <a href="../Vanquishers/FirstVanquisherGoddess/index.html" class="menu-container firstgoddess is-link" role="link" aria-label="First Vanquisher Goddess">
+                <div class="menu-button">First Vanquisher Goddess</div>
+            </a>
+        </div>
+
+        <div class="menu-card royal">
+            <div class="menu-icon" aria-hidden="true"></div>
+            <a href="../Vanquishers/RoyalWarrior/index.html" class="menu-container royalwarrior is-link" role="link" aria-label="Royal Warrior">
+                <div class="menu-button">Royal Warrior</div>
+            </a>
+        </div>
+
+        <div class="menu-card vanq-war">
+            <div class="menu-icon" aria-hidden="true"></div>
+            <a href="../Vanquishers/VanqquisherWarrior/index.html" class="menu-container vanquisherwarrior is-link" role="link" aria-label="Vanquisher Warrior">
+                <div class="menu-button">Vanquisher Warrior</div>
+            </a>
+        </div>
+
+    </div>
+
+<script>
+/*
+ Micro fade-out before navigation:
+ - Previene la navigazione immediata, aggiunge 'page-fade-out' al body
+ - Dopo CLICK_DELAY ms naviga verso href
+*/
+(function(){
+    const CLICK_DELAY = 360; // ms
+    function attachFade(linkEl){
+        linkEl.addEventListener('click', function(e){
+            const href = linkEl.getAttribute('href');
+            if(!href || href.startsWith('#')) return;
+            e.preventDefault();
+            if(document.body.classList.contains('page-fade-out')) return;
+            document.body.classList.add('page-fade-out');
+            setTimeout(()=> { window.location.href = href; }, CLICK_DELAY);
+        });
+    }
+
+    // attach to all full-container links + back-button
+    document.querySelectorAll('a.menu-container.is-link, a.menu-link, a.back-button').forEach(attachFade);
+})();
+</script>
+
+</body>
+</html>
