@@ -48,26 +48,22 @@
 <script>
 (async function () {
 
-  async function loadJSON() {
-    const res = await fetch('readme.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('readme.json non trovato');
-    return res.json();
-  }
-
-  const data = await loadJSON();
+  const res = await fetch('readme.json', { cache: 'no-store' });
+  if (!res.ok) throw new Error('readme.json non trovato');
+  const data = await res.json();
 
   const $ = s => document.querySelector(s);
 
-  // META
+  /* ================= META ================= */
   $('#entity-title').textContent = data.meta.entity;
   $('.entity-human').textContent = data.meta.humanName;
   $('#portrait-img').src = data.meta.portrait;
   document.title = `${data.meta.entity} — ${data.meta.humanName}`;
 
-  // LORE
+  /* ================= LORE ================= */
   $('#lore').textContent = data.lore || '';
 
-  // STATS (SOLO statsOrder)
+  /* ================= STATS ================= */
   const statsWrap = $('#stats-list');
   statsWrap.innerHTML = '';
 
@@ -89,11 +85,12 @@
     statsWrap.appendChild(row);
   }
 
-  // ATTACKS
+  /* ================= ATTACKS (Executions + Slash + future) ================= */
   const attacksGrid = $('#attacks-grid');
   attacksGrid.innerHTML = '';
 
   for (const group of data.attacks) {
+
     const col = document.createElement('div');
     col.className = 'attacks-col';
 
@@ -103,6 +100,7 @@
     col.appendChild(title);
 
     for (const atk of group.items) {
+
       const box = document.createElement('div');
       box.className = 'attack';
 
@@ -143,17 +141,19 @@
     attacksGrid.appendChild(col);
   }
 
-  // ABILITIES
+  /* ================= ABILITIES ================= */
   const abilitiesWrap = $('#abilities-wrap');
   abilitiesWrap.innerHTML = '';
 
   if (data.abilities?.length) {
+
     const title = document.createElement('h3');
     title.className = 'attack-group-title';
     title.textContent = 'Other Abilities';
     abilitiesWrap.appendChild(title);
 
     for (const ab of data.abilities) {
+
       const box = document.createElement('div');
       box.className = 'attack';
 
@@ -186,13 +186,11 @@
           e.textContent = `Energies: +${ab.effects.energyPercent}%`;
           numbers.appendChild(e);
         }
-      } else {
-        if (ab.energyCost != null) {
-          const en = document.createElement('div');
-          en.className = 'cost';
-          en.textContent = `Energia: ${ab.energyCost}`;
-          numbers.appendChild(en);
-        }
+      } else if (ab.energyCost != null) {
+        const en = document.createElement('div');
+        en.className = 'cost';
+        en.textContent = `Energia: ${ab.energyCost}`;
+        numbers.appendChild(en);
       }
 
       box.append(meta, numbers);
