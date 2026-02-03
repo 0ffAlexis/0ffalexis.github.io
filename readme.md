@@ -6,7 +6,7 @@
   <br>
   
   ![Static Badge](https://img.shields.io/badge/HTML/CSS-a?style=for-the-badge&label=%3C%2F%3E&color=%23ffd000) 
-  ![Static Badge](https://img.shields.io/badge/Release-a?style=for-the-badge&label=status&color=%2363ad02)
-  ![Static Badge](https://img.shields.io/badge/1.3-a?style=for-the-badge&label=Versione&color=%2363ad02)
+  ![Static Badge](https://img.shields.io/badge/Release-a?style=for-the-badge&label=status&color=%FF0000)
+  ![Static Badge](https://img.shields.io/badge/1.0-a?style=for-the-badge&label=Versione&color=%FF0000)
 
 </h1>
