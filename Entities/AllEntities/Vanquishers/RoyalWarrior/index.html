@@ -1,156 +1,241 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8" />
-    <title>Royal Warrior — Hardwin</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <!-- link esterno al CSS (da sviluppare dopo) -->
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Royal Warrior — Hardwin</title>
+  <!-- CSS esterno (sviluppiamo dopo) -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Back -->
-    <a class="back-button is-link" href="../index.html">← Indietro</a>
+  <!-- Back -->
+  <a class="back-button is-link" href="../index.html">← Indietro</a>
 
-    <!-- Rift (decorative) -->
-    <div class="rift" aria-hidden="true">
-        <div class="rift-line main"></div>
-    </div>
+  <!-- Rift (decorative) -->
+  <div class="rift" aria-hidden="true">
+    <div class="rift-line main"></div>
+  </div>
 
-    <main class="container" role="main" aria-labelledby="entity-title">
+  <main class="container" role="main" aria-labelledby="entity-title">
 
-        <!-- LEFT column (title, human name, image, stats, lore) -->
-        <section class="left-col">
-            <header class="left-header">
-                <h1 id="entity-title" class="entity-title">Royal Warrior</h1>
-                <div class="entity-human">Hardwin</div>
-            </header>
+    <!-- LEFT column -->
+    <section class="left-col">
+      <header class="left-header">
+        <h1 id="entity-title" class="entity-title">Royal Warrior</h1>
+        <div class="entity-human">Hardwin</div>
+      </header>
 
-            <figure class="portrait">
-                <!-- ritratto: verrà impostato da readme.json -->
-                <img id="portrait-img" src="entity.jpg" alt="Royal Warrior — ritratto" class="entity-image" />
-            </figure>
+      <figure class="portrait">
+        <img id="portrait-img" src="entity.jpg" alt="Royal Warrior — ritratto" class="entity-image" />
+      </figure>
 
-            <div class="card card-left" aria-labelledby="stats-title">
-                <h2 id="stats-title" class="card-title">Statistiche</h2>
+      <div class="card card-left" aria-labelledby="stats-title">
+        <h2 id="stats-title" class="card-title">Statistiche</h2>
 
-                <div class="stats-list" role="list" id="stats-list">
-                    <!-- popolato da readme.json -->
-                </div>
+        <div class="stats-list" role="list" id="stats-list">
+          <!-- popolato da readme.json -->
+        </div>
 
-                <h3 class="card-subtitle">Lore</h3>
-                <div class="lore" id="lore">
-                    <!-- popolato da readme.json -->
-                </div>
-            </div>
-        </section>
+        <h3 class="card-subtitle">Lore</h3>
+        <div class="lore" id="lore"></div>
+      </div>
+    </section>
 
-        <!-- RIGHT column (attacks) -->
-        <aside class="right-col">
-            <div class="card card-right" aria-labelledby="attacks-title">
-                <h2 id="attacks-title" class="card-title">Attacks</h2>
+    <!-- RIGHT column -->
+    <aside class="right-col">
+      <div class="card card-right" aria-labelledby="attacks-title">
+        <h2 id="attacks-title" class="card-title">Attacks</h2>
 
-                <div class="attacks-grid" id="attacks-grid">
-                    <!-- popolato da readme.json -->
-                </div>
+        <div class="attacks-grid" id="attacks-grid"><!-- popolato --></div>
 
-                <!-- Other abilities below attacks -->
-                <div class="other-abilities" id="abilities-wrap" style="margin-top:12px;"></div>
+        <div class="other-abilities" id="abilities-wrap" style="margin-top:12px;"></div>
 
-            </div>
-        </aside>
+      </div>
+    </aside>
 
-    </main>
+  </main>
 
 <script>
-/* Carica readme.json dalla stessa cartella e popola la pagina. 
-   readme.json è obbligatorio — se manca verrà mostrato un warning in console.
+/* Renderer avanzato: supporta nested objects (resistenze), ordine personalizzato (statsOrder),
+   percentuali per abilità, e mostra Danno/Energia formattati.
+   ATTENZIONE: per usare fetch correttamente aprire via server (http://localhost...) oppure usare il file-picker fallback.
 */
 (async function(){
-  async function loadJSON(path){
-    try{
+  async function fetchJSON(path){
+    try {
       const r = await fetch(path, { cache: 'no-store' });
-      if(!r.ok) throw new Error('fetch failed');
+      if(!r.ok) throw new Error('fetch failed: ' + r.status);
       return await r.json();
-    }catch(e){
-      console.warn('readme.json non trovato:', e);
+    } catch(e) {
       return null;
     }
   }
 
-  const data = await loadJSON('readme.json');
-  if(!data) return;
+  // prova a leggere readme.json (deve essere nella stessa cartella)
+  let data = await fetchJSON('readme.json');
 
-  function toLabel(k){ return String(k).replace(/([A-Z])/g,' $1').replace(/_/g,' ').replace(/^./,s=>s.toUpperCase()); }
-
-  // meta
-  if(data.meta){
-    if(data.meta.entity) document.getElementById('entity-title').textContent = data.meta.entity;
-    if(data.meta.humanName) document.querySelector('.entity-human').textContent = data.meta.humanName;
-    if(data.meta.portrait) document.getElementById('portrait-img').src = data.meta.portrait;
+  // fallback: se manca, prova a cercare un embed con id initial-readme
+  if(!data){
+    const embed = document.getElementById('initial-readme');
+    if(embed){
+      try { data = JSON.parse(embed.textContent); } catch(e){ data = null; }
+    }
   }
 
-  // lore
-  if(data.lore) document.getElementById('lore').textContent = data.lore;
+  if(!data){
+    console.warn('Nessun readme.json trovato. Apri la pagina via server o usa file-picker fallback.');
+    return;
+  }
 
-  // stats
+  // helper: convert key -> Label (camelCase/snake -> Title Case)
+  function toLabel(key){
+    return String(key).replace(/([A-Z])/g,' $1').replace(/_/g,' ').replace(/^./,s=>s.toUpperCase());
+  }
+
+  // render helpers
+  function createTextNode(text){ return document.createTextNode(text); }
+
+  // Render a value (primitive / object / array)
+  function renderValue(value){
+    if(value === null || value === undefined) return createTextNode('—');
+    if(typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'){
+      return createTextNode(String(value));
+    }
+    if(Array.isArray(value)){
+      return createTextNode(value.join(', '));
+    }
+    // object -> create nested list
+    const container = document.createElement('div');
+    container.className = 'nested-object';
+    for(const k of Object.keys(value)){
+      const row = document.createElement('div');
+      row.className = 'nested-row';
+      const lbl = document.createElement('div'); lbl.className = 'nested-key'; lbl.textContent = toLabel(k);
+      const val = document.createElement('div'); val.className = 'nested-val';
+      // if value is number and looks like percent (wen't know), just print
+      val.appendChild(renderValue(value[k]));
+      row.appendChild(lbl); row.appendChild(val); container.appendChild(row);
+    }
+    return container;
+  }
+
+  // populate meta
+  if(data.meta){
+    if(data.meta.entity) {
+      const t = document.getElementById('entity-title'); if(t) t.textContent = data.meta.entity;
+    }
+    if(data.meta.humanName){
+      const he = document.querySelector('.entity-human'); if(he) he.textContent = data.meta.humanName;
+    }
+    if(data.meta.portrait){
+      const img = document.getElementById('portrait-img'); if(img) img.src = data.meta.portrait;
+    }
+  }
+
+  // populate lore
+  if(data.lore){
+    const loreEl = document.getElementById('lore'); if(loreEl) loreEl.textContent = data.lore;
+  }
+
+  // populate stats (respect statsOrder if present)
   (function(){
-    const sWrap = document.getElementById('stats-list'); sWrap.innerHTML = '';
+    const statsWrap = document.getElementById('stats-list'); if(!statsWrap) return;
+    statsWrap.innerHTML = '';
     const s = data.stats || {};
-    for(const key of Object.keys(s)){
-      const row = document.createElement('div'); row.className='stat'; row.setAttribute('role','listitem');
-      const lbl = document.createElement('div'); lbl.className='label'; lbl.textContent = toLabel(key);
-      const val = document.createElement('div'); val.className='value'; val.textContent = (s[key] === null || s[key] === undefined) ? '—' : s[key];
-      row.appendChild(lbl); row.appendChild(val); sWrap.appendChild(row);
+    const order = Array.isArray(data.statsOrder) ? data.statsOrder : Object.keys(s);
+    for(const key of order){
+      if(!(key in s)) continue;
+      const row = document.createElement('div'); row.className = 'stat'; row.setAttribute('role','listitem');
+      const label = document.createElement('div'); label.className = 'label'; label.textContent = toLabel(key);
+      const valueWrap = document.createElement('div'); valueWrap.className = 'value';
+      // if value is object (e.g. resistances) render nested
+      const val = s[key];
+      if(val !== null && typeof val === 'object' && !Array.isArray(val)){
+        valueWrap.appendChild(renderValue(val));
+      } else {
+        valueWrap.textContent = (val === null || val === undefined) ? '—' : String(val);
+      }
+      row.appendChild(label); row.appendChild(valueWrap); statsWrap.appendChild(row);
     }
   })();
 
-  // attacks
+  // populate attacks
   (function(){
-    const grid = document.getElementById('attacks-grid'); grid.innerHTML = '';
+    const attacksGrid = document.getElementById('attacks-grid'); if(!attacksGrid) return;
+    attacksGrid.innerHTML = '';
     const groups = data.attacks || [];
+    if(groups.length === 0){ attacksGrid.textContent = '—'; return; }
     for(const g of groups){
-      const col = document.createElement('div'); col.className='attacks-col';
-      const h = document.createElement('h3'); h.className='attack-group-title'; h.textContent = g.group || 'Group'; col.appendChild(h);
-      for(const it of (g.items||[])){
-        const a = document.createElement('div'); a.className='attack';
-        const meta = document.createElement('div'); meta.className='meta';
-        const name = document.createElement('div'); name.className='name'; name.textContent = it.name || '—';
-        const desc = document.createElement('div'); desc.className='desc muted'; desc.textContent = it.desc || '';
+      const col = document.createElement('div'); col.className = 'attacks-col';
+      const title = document.createElement('h3'); title.className = 'attack-group-title'; title.textContent = g.group || 'Group';
+      col.appendChild(title);
+      for(const it of (g.items || [])){
+        const item = document.createElement('div'); item.className = 'attack';
+        const meta = document.createElement('div'); meta.className = 'meta';
+        const name = document.createElement('div'); name.className = 'name'; name.textContent = it.name || '—';
+        const desc = document.createElement('div'); desc.className = 'desc muted'; desc.textContent = it.desc || '';
         meta.appendChild(name); meta.appendChild(desc);
-        const nums = document.createElement('div'); nums.className='numbers';
-        const dmg = document.createElement('div'); dmg.className='dmg'; dmg.textContent = 'Danno: ' + (it.damage ?? '—');
-        const cost = document.createElement('div'); cost.className='cost'; cost.textContent = 'Energia: ' + (it.energyCost ?? '—');
-        nums.appendChild(dmg); nums.appendChild(cost);
-        a.appendChild(meta); a.appendChild(nums);
-        col.appendChild(a);
+
+        const numbers = document.createElement('div'); numbers.className = 'numbers';
+        // Danno
+        const dmg = document.createElement('div'); dmg.className = 'dmg';
+        dmg.textContent = 'Danno: ' + (it.damage ?? '—');
+        // Energia
+        const cost = document.createElement('div'); cost.className = 'cost';
+        cost.textContent = 'Energia: ' + (it.energyCost ?? '—');
+
+        numbers.appendChild(dmg); numbers.appendChild(cost);
+
+        item.appendChild(meta); item.appendChild(numbers);
+        col.appendChild(item);
       }
-      grid.appendChild(col);
+      attacksGrid.appendChild(col);
     }
   })();
 
-  // abilities
+  // populate abilities
   (function(){
-    const wrap = document.getElementById('abilities-wrap'); wrap.innerHTML = '';
+    const wrap = document.getElementById('abilities-wrap'); if(!wrap) return;
+    wrap.innerHTML = '';
     const list = data.abilities || [];
-    if(list.length){
-      const title = document.createElement('h3'); title.className='attack-group-title'; title.textContent='Other Abilities'; wrap.appendChild(title);
-      for(const ab of list){
-        const a = document.createElement('div'); a.className='attack';
-        const meta = document.createElement('div'); meta.className='meta';
-        const name = document.createElement('div'); name.className='name'; name.textContent = ab.name || '—';
-        const desc = document.createElement('div'); desc.className='desc muted'; desc.textContent = ab.desc || '';
-        meta.appendChild(name); meta.appendChild(desc);
-        const nums = document.createElement('div'); nums.className='numbers';
-        const dmg = document.createElement('div'); dmg.className='dmg'; dmg.textContent = (ab.damage != null) ? ('Danno: ' + ab.damage) : 'Danno: —';
-        const cost = document.createElement('div'); cost.className='cost'; cost.textContent = (ab.energyCost != null) ? ('Energia: ' + ab.energyCost) : '';
-        nums.appendChild(dmg); if(cost.textContent) nums.appendChild(cost);
-        a.appendChild(meta); a.appendChild(nums); wrap.appendChild(a);
+    if(list.length === 0) return;
+    const title = document.createElement('h3'); title.className = 'attack-group-title'; title.textContent = 'Other Abilities';
+    wrap.appendChild(title);
+    for(const ab of list){
+      const node = document.createElement('div'); node.className = 'attack';
+      const meta = document.createElement('div'); meta.className = 'meta';
+      const name = document.createElement('div'); name.className = 'name'; name.textContent = ab.name || '—';
+      const desc = document.createElement('div'); desc.className = 'desc muted'; desc.textContent = ab.desc || '';
+      meta.appendChild(name); meta.appendChild(desc);
+
+      const numbers = document.createElement('div'); numbers.className = 'numbers';
+      if(ab.effects && typeof ab.effects === 'object'){
+        // format known effects
+        if(ab.effects.healthPercent != null){
+          const h = document.createElement('div'); h.className = 'dmg'; h.textContent = 'Health: +' + ab.effects.healthPercent + '%';
+          numbers.appendChild(h);
+        }
+        if(ab.effects.energyPercent != null){
+          const e = document.createElement('div'); e.className = 'cost'; e.textContent = 'Energies: +' + ab.effects.energyPercent + '%';
+          numbers.appendChild(e);
+        }
+      } else {
+        const dmg = document.createElement('div'); dmg.className = 'dmg';
+        dmg.textContent = (ab.damage != null) ? ('Danno: ' + ab.damage) : 'Danno: —';
+        numbers.appendChild(dmg);
+        if(ab.energyCost != null){
+          const c = document.createElement('div'); c.className = 'cost'; c.textContent = 'Energia: ' + ab.energyCost;
+          numbers.appendChild(c);
+        }
       }
+
+      node.appendChild(meta); node.appendChild(numbers);
+      wrap.appendChild(node);
     }
   })();
 
-  // layout: simple reordering by keys (leftColumn, rightColumn)
+  // optional: support simple reordering by layout (leftColumn/rightColumn)
   if(data.layout && typeof data.layout === 'object'){
     try{
       const left = document.querySelector('.left-col'); const right = document.querySelector('.right-col');
@@ -163,27 +248,27 @@
       };
       (data.layout.leftColumn || []).forEach(k=>{ const n = map[k] && map[k](); if(n && n.parentNode !== left) left.appendChild(n); });
       (data.layout.rightColumn || []).forEach(k=>{ const n = map[k] && map[k](); if(n && n.parentNode !== right) right.appendChild(n); });
-    }catch(e){ /* ignore */ }
+    }catch(e){}
   }
 
 })();
 </script>
 
 <script>
-/* Micro fade-out before navigation */
+/* Micro fade-out before navigation (unchanged) */
 (function(){
-    const CLICK_DELAY = 360;
-    function attachFade(a){
-        a.addEventListener('click', function(e){
-            const href = a.getAttribute('href');
-            if(!href || href.startsWith('#')) return;
-            e.preventDefault();
-            if(document.body.classList.contains('page-fade-out')) return;
-            document.body.classList.add('page-fade-out');
-            setTimeout(()=> { window.location.href = href; }, CLICK_DELAY);
-        });
-    }
-    document.querySelectorAll('a.is-link, a.back-button').forEach(attachFade);
+  const CLICK_DELAY = 360;
+  function attachFade(a){
+    a.addEventListener('click', function(e){
+      const href = a.getAttribute('href');
+      if(!href || href.startsWith('#')) return;
+      e.preventDefault();
+      if(document.body.classList.contains('page-fade-out')) return;
+      document.body.classList.add('page-fade-out');
+      setTimeout(()=> { window.location.href = href; }, CLICK_DELAY);
+    });
+  }
+  document.querySelectorAll('a.is-link, a.back-button').forEach(attachFade);
 })();
 </script>
 
