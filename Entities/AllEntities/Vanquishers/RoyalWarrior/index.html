@@ -3,272 +3,218 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Royal Warrior — Hardwin</title>
-  <!-- CSS esterno (sviluppiamo dopo) -->
+  <title>Entity</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Back -->
-  <a class="back-button is-link" href="../index.html">← Indietro</a>
+<a class="back-button is-link" href="../index.html">← Indietro</a>
 
-  <!-- Rift (decorative) -->
-  <div class="rift" aria-hidden="true">
-    <div class="rift-line main"></div>
-  </div>
+<div class="rift" aria-hidden="true">
+  <div class="rift-line main"></div>
+</div>
 
-  <main class="container" role="main" aria-labelledby="entity-title">
+<main class="container" role="main" aria-labelledby="entity-title">
 
-    <!-- LEFT column -->
-    <section class="left-col">
-      <header class="left-header">
-        <h1 id="entity-title" class="entity-title">Royal Warrior</h1>
-        <div class="entity-human">Hardwin</div>
-      </header>
+  <section class="left-col">
+    <header class="left-header">
+      <h1 id="entity-title" class="entity-title"></h1>
+      <div class="entity-human"></div>
+    </header>
 
-      <figure class="portrait">
-        <img id="portrait-img" src="entity.jpg" alt="Royal Warrior — ritratto" class="entity-image" />
-      </figure>
+    <figure class="portrait">
+      <img id="portrait-img" class="entity-image" />
+    </figure>
 
-      <div class="card card-left" aria-labelledby="stats-title">
-        <h2 id="stats-title" class="card-title">Statistiche</h2>
+    <div class="card card-left">
+      <h2 class="card-title">Statistiche</h2>
+      <div class="stats-list" id="stats-list"></div>
 
-        <div class="stats-list" role="list" id="stats-list">
-          <!-- popolato da readme.json -->
-        </div>
+      <h3 class="card-subtitle">Lore</h3>
+      <div class="lore" id="lore"></div>
+    </div>
+  </section>
 
-        <h3 class="card-subtitle">Lore</h3>
-        <div class="lore" id="lore"></div>
-      </div>
-    </section>
+  <aside class="right-col">
+    <div class="card card-right">
+      <h2 class="card-title">Attacks</h2>
+      <div class="attacks-grid" id="attacks-grid"></div>
+      <div id="abilities-wrap" style="margin-top:12px;"></div>
+    </div>
+  </aside>
 
-    <!-- RIGHT column -->
-    <aside class="right-col">
-      <div class="card card-right" aria-labelledby="attacks-title">
-        <h2 id="attacks-title" class="card-title">Attacks</h2>
-
-        <div class="attacks-grid" id="attacks-grid"><!-- popolato --></div>
-
-        <div class="other-abilities" id="abilities-wrap" style="margin-top:12px;"></div>
-
-      </div>
-    </aside>
-
-  </main>
+</main>
 
 <script>
-/* Renderer avanzato: supporta nested objects (resistenze), ordine personalizzato (statsOrder),
-   percentuali per abilità, e mostra Danno/Energia formattati.
-   ATTENZIONE: per usare fetch correttamente aprire via server (http://localhost...) oppure usare il file-picker fallback.
-*/
-(async function(){
-  async function fetchJSON(path){
-    try {
-      const r = await fetch(path, { cache: 'no-store' });
-      if(!r.ok) throw new Error('fetch failed: ' + r.status);
-      return await r.json();
-    } catch(e) {
-      return null;
-    }
+(async function () {
+
+  async function loadJSON() {
+    const res = await fetch('readme.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('readme.json non trovato');
+    return res.json();
   }
 
-  // prova a leggere readme.json (deve essere nella stessa cartella)
-  let data = await fetchJSON('readme.json');
+  const data = await loadJSON();
 
-  // fallback: se manca, prova a cercare un embed con id initial-readme
-  if(!data){
-    const embed = document.getElementById('initial-readme');
-    if(embed){
-      try { data = JSON.parse(embed.textContent); } catch(e){ data = null; }
-    }
+  const $ = s => document.querySelector(s);
+
+  // META
+  $('#entity-title').textContent = data.meta.entity;
+  $('.entity-human').textContent = data.meta.humanName;
+  $('#portrait-img').src = data.meta.portrait;
+  document.title = `${data.meta.entity} — ${data.meta.humanName}`;
+
+  // LORE
+  $('#lore').textContent = data.lore || '';
+
+  // STATS (SOLO statsOrder)
+  const statsWrap = $('#stats-list');
+  statsWrap.innerHTML = '';
+
+  for (const key of data.statsOrder) {
+    if (!(key in data.stats)) continue;
+
+    const row = document.createElement('div');
+    row.className = 'stat';
+
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = key.replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase());
+
+    const value = document.createElement('div');
+    value.className = 'value';
+    value.textContent = data.stats[key];
+
+    row.append(label, value);
+    statsWrap.appendChild(row);
   }
 
-  if(!data){
-    console.warn('Nessun readme.json trovato. Apri la pagina via server o usa file-picker fallback.');
-    return;
-  }
+  // ATTACKS
+  const attacksGrid = $('#attacks-grid');
+  attacksGrid.innerHTML = '';
 
-  // helper: convert key -> Label (camelCase/snake -> Title Case)
-  function toLabel(key){
-    return String(key).replace(/([A-Z])/g,' $1').replace(/_/g,' ').replace(/^./,s=>s.toUpperCase());
-  }
+  for (const group of data.attacks) {
+    const col = document.createElement('div');
+    col.className = 'attacks-col';
 
-  // render helpers
-  function createTextNode(text){ return document.createTextNode(text); }
+    const title = document.createElement('h3');
+    title.className = 'attack-group-title';
+    title.textContent = group.group;
+    col.appendChild(title);
 
-  // Render a value (primitive / object / array)
-  function renderValue(value){
-    if(value === null || value === undefined) return createTextNode('—');
-    if(typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'){
-      return createTextNode(String(value));
-    }
-    if(Array.isArray(value)){
-      return createTextNode(value.join(', '));
-    }
-    // object -> create nested list
-    const container = document.createElement('div');
-    container.className = 'nested-object';
-    for(const k of Object.keys(value)){
-      const row = document.createElement('div');
-      row.className = 'nested-row';
-      const lbl = document.createElement('div'); lbl.className = 'nested-key'; lbl.textContent = toLabel(k);
-      const val = document.createElement('div'); val.className = 'nested-val';
-      // if value is number and looks like percent (wen't know), just print
-      val.appendChild(renderValue(value[k]));
-      row.appendChild(lbl); row.appendChild(val); container.appendChild(row);
-    }
-    return container;
-  }
+    for (const atk of group.items) {
+      const box = document.createElement('div');
+      box.className = 'attack';
 
-  // populate meta
-  if(data.meta){
-    if(data.meta.entity) {
-      const t = document.getElementById('entity-title'); if(t) t.textContent = data.meta.entity;
-    }
-    if(data.meta.humanName){
-      const he = document.querySelector('.entity-human'); if(he) he.textContent = data.meta.humanName;
-    }
-    if(data.meta.portrait){
-      const img = document.getElementById('portrait-img'); if(img) img.src = data.meta.portrait;
-    }
-  }
+      const meta = document.createElement('div');
+      meta.className = 'meta';
 
-  // populate lore
-  if(data.lore){
-    const loreEl = document.getElementById('lore'); if(loreEl) loreEl.textContent = data.lore;
-  }
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = atk.name;
 
-  // populate stats (respect statsOrder if present)
-  (function(){
-    const statsWrap = document.getElementById('stats-list'); if(!statsWrap) return;
-    statsWrap.innerHTML = '';
-    const s = data.stats || {};
-    const order = Array.isArray(data.statsOrder) ? data.statsOrder : Object.keys(s);
-    for(const key of order){
-      if(!(key in s)) continue;
-      const row = document.createElement('div'); row.className = 'stat'; row.setAttribute('role','listitem');
-      const label = document.createElement('div'); label.className = 'label'; label.textContent = toLabel(key);
-      const valueWrap = document.createElement('div'); valueWrap.className = 'value';
-      // if value is object (e.g. resistances) render nested
-      const val = s[key];
-      if(val !== null && typeof val === 'object' && !Array.isArray(val)){
-        valueWrap.appendChild(renderValue(val));
-      } else {
-        valueWrap.textContent = (val === null || val === undefined) ? '—' : String(val);
+      const desc = document.createElement('div');
+      desc.className = 'desc muted';
+      desc.textContent = atk.desc || '';
+
+      meta.append(name, desc);
+
+      const numbers = document.createElement('div');
+      numbers.className = 'numbers';
+
+      if (atk.damage != null) {
+        const dmg = document.createElement('div');
+        dmg.className = 'dmg';
+        dmg.textContent = `Danno: ${atk.damage}`;
+        numbers.appendChild(dmg);
       }
-      row.appendChild(label); row.appendChild(valueWrap); statsWrap.appendChild(row);
-    }
-  })();
 
-  // populate attacks
-  (function(){
-    const attacksGrid = document.getElementById('attacks-grid'); if(!attacksGrid) return;
-    attacksGrid.innerHTML = '';
-    const groups = data.attacks || [];
-    if(groups.length === 0){ attacksGrid.textContent = '—'; return; }
-    for(const g of groups){
-      const col = document.createElement('div'); col.className = 'attacks-col';
-      const title = document.createElement('h3'); title.className = 'attack-group-title'; title.textContent = g.group || 'Group';
-      col.appendChild(title);
-      for(const it of (g.items || [])){
-        const item = document.createElement('div'); item.className = 'attack';
-        const meta = document.createElement('div'); meta.className = 'meta';
-        const name = document.createElement('div'); name.className = 'name'; name.textContent = it.name || '—';
-        const desc = document.createElement('div'); desc.className = 'desc muted'; desc.textContent = it.desc || '';
-        meta.appendChild(name); meta.appendChild(desc);
-
-        const numbers = document.createElement('div'); numbers.className = 'numbers';
-        // Danno
-        const dmg = document.createElement('div'); dmg.className = 'dmg';
-        dmg.textContent = 'Danno: ' + (it.damage ?? '—');
-        // Energia
-        const cost = document.createElement('div'); cost.className = 'cost';
-        cost.textContent = 'Energia: ' + (it.energyCost ?? '—');
-
-        numbers.appendChild(dmg); numbers.appendChild(cost);
-
-        item.appendChild(meta); item.appendChild(numbers);
-        col.appendChild(item);
+      if (atk.energyCost != null) {
+        const en = document.createElement('div');
+        en.className = 'cost';
+        en.textContent = `Energia: ${atk.energyCost}`;
+        numbers.appendChild(en);
       }
-      attacksGrid.appendChild(col);
+
+      box.append(meta, numbers);
+      col.appendChild(box);
     }
-  })();
 
-  // populate abilities
-  (function(){
-    const wrap = document.getElementById('abilities-wrap'); if(!wrap) return;
-    wrap.innerHTML = '';
-    const list = data.abilities || [];
-    if(list.length === 0) return;
-    const title = document.createElement('h3'); title.className = 'attack-group-title'; title.textContent = 'Other Abilities';
-    wrap.appendChild(title);
-    for(const ab of list){
-      const node = document.createElement('div'); node.className = 'attack';
-      const meta = document.createElement('div'); meta.className = 'meta';
-      const name = document.createElement('div'); name.className = 'name'; name.textContent = ab.name || '—';
-      const desc = document.createElement('div'); desc.className = 'desc muted'; desc.textContent = ab.desc || '';
-      meta.appendChild(name); meta.appendChild(desc);
+    attacksGrid.appendChild(col);
+  }
 
-      const numbers = document.createElement('div'); numbers.className = 'numbers';
-      if(ab.effects && typeof ab.effects === 'object'){
-        // format known effects
-        if(ab.effects.healthPercent != null){
-          const h = document.createElement('div'); h.className = 'dmg'; h.textContent = 'Health: +' + ab.effects.healthPercent + '%';
+  // ABILITIES
+  const abilitiesWrap = $('#abilities-wrap');
+  abilitiesWrap.innerHTML = '';
+
+  if (data.abilities?.length) {
+    const title = document.createElement('h3');
+    title.className = 'attack-group-title';
+    title.textContent = 'Other Abilities';
+    abilitiesWrap.appendChild(title);
+
+    for (const ab of data.abilities) {
+      const box = document.createElement('div');
+      box.className = 'attack';
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = ab.name;
+
+      const desc = document.createElement('div');
+      desc.className = 'desc muted';
+      desc.textContent = ab.desc || '';
+
+      meta.append(name, desc);
+
+      const numbers = document.createElement('div');
+      numbers.className = 'numbers';
+
+      if (ab.effects) {
+        if (ab.effects.healthPercent != null) {
+          const h = document.createElement('div');
+          h.className = 'dmg';
+          h.textContent = `Health: +${ab.effects.healthPercent}%`;
           numbers.appendChild(h);
         }
-        if(ab.effects.energyPercent != null){
-          const e = document.createElement('div'); e.className = 'cost'; e.textContent = 'Energies: +' + ab.effects.energyPercent + '%';
+        if (ab.effects.energyPercent != null) {
+          const e = document.createElement('div');
+          e.className = 'cost';
+          e.textContent = `Energies: +${ab.effects.energyPercent}%`;
           numbers.appendChild(e);
         }
       } else {
-        const dmg = document.createElement('div'); dmg.className = 'dmg';
-        dmg.textContent = (ab.damage != null) ? ('Danno: ' + ab.damage) : 'Danno: —';
-        numbers.appendChild(dmg);
-        if(ab.energyCost != null){
-          const c = document.createElement('div'); c.className = 'cost'; c.textContent = 'Energia: ' + ab.energyCost;
-          numbers.appendChild(c);
+        if (ab.energyCost != null) {
+          const en = document.createElement('div');
+          en.className = 'cost';
+          en.textContent = `Energia: ${ab.energyCost}`;
+          numbers.appendChild(en);
         }
       }
 
-      node.appendChild(meta); node.appendChild(numbers);
-      wrap.appendChild(node);
+      box.append(meta, numbers);
+      abilitiesWrap.appendChild(box);
     }
-  })();
-
-  // optional: support simple reordering by layout (leftColumn/rightColumn)
-  if(data.layout && typeof data.layout === 'object'){
-    try{
-      const left = document.querySelector('.left-col'); const right = document.querySelector('.right-col');
-      const map = {
-        portrait: () => document.querySelector('.portrait')?.closest('.card') || document.querySelector('.portrait'),
-        stats: () => document.querySelector('#stats-list')?.closest('.card'),
-        lore: () => document.querySelector('#lore')?.closest('.card'),
-        attacks: () => document.querySelector('#attacks-grid')?.closest('.card'),
-        abilities: () => document.querySelector('#abilities-wrap')?.closest('.card')
-      };
-      (data.layout.leftColumn || []).forEach(k=>{ const n = map[k] && map[k](); if(n && n.parentNode !== left) left.appendChild(n); });
-      (data.layout.rightColumn || []).forEach(k=>{ const n = map[k] && map[k](); if(n && n.parentNode !== right) right.appendChild(n); });
-    }catch(e){}
   }
 
 })();
 </script>
 
 <script>
-/* Micro fade-out before navigation (unchanged) */
 (function(){
   const CLICK_DELAY = 360;
-  function attachFade(a){
-    a.addEventListener('click', function(e){
+  document.querySelectorAll('a.is-link, a.back-button').forEach(a=>{
+    a.addEventListener('click', e=>{
       const href = a.getAttribute('href');
       if(!href || href.startsWith('#')) return;
       e.preventDefault();
-      if(document.body.classList.contains('page-fade-out')) return;
       document.body.classList.add('page-fade-out');
-      setTimeout(()=> { window.location.href = href; }, CLICK_DELAY);
+      setTimeout(()=>location.href=href, CLICK_DELAY);
     });
-  }
-  document.querySelectorAll('a.is-link, a.back-button').forEach(attachFade);
+  });
 })();
 </script>
 
