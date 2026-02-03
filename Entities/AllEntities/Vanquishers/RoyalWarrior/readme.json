@@ -14,25 +14,13 @@
   "statsOrder": [
     "vita",
     "energie",
-    "livelloInvisibilita",
-    "velocita",
-    "armatura",
-    "armaturaMagica",
-    "crit",
-    "resistenze"
+    "livelloInvisibilita"
   ],
   "stats": {
     "vita": 4000,
     "energie": 190,
     "livelloInvisibilita": 5,
-    "velocita": 24,
-    "armatura": 0,
-    "armaturaMagica": 0,
-    "crit": 0,
-    "resistenze": {
-      "Fuoco": 0,
-      "Gelo": 0,
-      "Elettrico": 0
+    "armatura": 0
     }
   },
   "lore": "Hardwin è un guerriero d'élite della casata reale: specializzato in combattimento ravvicinato, dotato di tecniche esecutive che consumano grandi quantità di energia in cambio di danno devastante. (Inserisci qui la lore completa...)",
@@ -57,7 +45,7 @@
     }
   ],
   "abilities": [
-    { "key": "switch", "name": "Switch", "desc": "Cambio rapido", "damage": null, "energyCost": 10 },
+    { "key": "switch", "name": "Switch", "desc": "Cambio rapido", "energyCost": 10 },
     {
       "key": "eternal_hope",
       "name": "Eternal Hope",
@@ -76,3 +64,4 @@
     "version": "1.1"
   }
 }
+
