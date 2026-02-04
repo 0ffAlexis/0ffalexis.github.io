@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <script>
-    const password = localStorage.getItem('savedPassword');
-    const root = "https://0ffalexis.github.io/"
-
-    if (password === "RPAdmin") {window.location.href = root + "Entities";}  
-    else if (password === "admin") {window.location.href = "https://www.youtube.com/watch?v=xvFZjo5PgG0"}
-    
-    else {window.location.href = root + "verify";}
-  </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="icon" href="https://pack.ultrasmp.online/assets/omega-iconSmall.png" type="image/png">
@@ -17,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
   <style>
+    /* ========== BASE (fusione dei tuoi stili + integrazione animazione) ========== */
     :root {
       --bg: #0a0a0a;
       --card-bg: rgba(255,255,255,0.06);
@@ -27,26 +19,29 @@
       --transition: 0.25s ease;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Inter, -apple-system, "Segoe UI", Roboto, "Open Sans", sans-serif; }
 
+    /* Body / background (usiamo i gradient che hai fornito) */
+    :root{
+        --bg-1: #000000;
+        --bg-2: #0f0f0f;
+        --bg-3: #2a2a2a;
+    }
     body {
       height: 100vh;
-      background: radial-gradient(1200px 800px at 20% 10%, rgba(0,122,255,0.1), transparent),
-                  radial-gradient(900px 500px at 80% 90%, rgba(255,255,255,0.05), transparent),
-                  var(--bg);
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 32px;
       color: var(--text);
       -webkit-font-smoothing: antialiased;
+      /* background default (verrà rivelato dopo l'overlay) */
+      background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 45%, var(--bg-3) 100%);
+      position: relative;
     }
 
+    /* Card esistente (fuso) */
     .card {
       position: relative;
       width: 100%;
@@ -59,18 +54,11 @@
       text-align: center;
       box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
       animation: fadeIn 0.6s var(--transition) forwards;
+      z-index: 2;
     }
 
-    h1 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-
-    p {
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
+    h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 10px; }
+    p { color: var(--muted); font-size: 0.95rem; }
 
     .omega {
       position: absolute;
@@ -82,6 +70,7 @@
       animation: float 6s ease-in-out infinite, rotate 20s linear infinite;
       opacity: 0.9;
       filter: drop-shadow(0 0 12px rgba(124,77,255,0.3));
+      z-index: 3;
     }
 
     .redirect-icon {
@@ -107,24 +96,109 @@
       border-radius: 2px;
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    /* Altri styles fusi dalla tua seconda sheet (menu, rift, ecc) */
+    .back-button{ position:absolute; top:20px; left:20px; padding:10px 18px; background: linear-gradient(145deg,#0f0f0f,#2a2a2a); border-radius:12px; border:1px solid rgba(255,255,255,0.06); color:#f2f2f2; font-weight:700; text-decoration:none; box-shadow:0 0 10px rgba(255,255,255,0.06); transition: transform .22s ease, box-shadow .22s ease; z-index:12; }
+    .menu-page-container{ display:flex; flex-direction:row; justify-content:space-around; align-items:flex-start; width:100%; max-width:1200px; position:relative; top:-120px; padding:0 50px; z-index:10; }
+    .menu-container{ width:320px; height:100px; background: rgba(0,0,0,0.6); border-radius:30px; position:relative; display:flex; justify-content:center; align-items:center; overflow:visible; transition: transform .28s cubic-bezier(.2,.9,.3,1); will-change: transform, opacity; opacity:0; transform: translateY(40px); animation-name: menuFadeUp; animation-duration: 1.0s; animation-timing-function: cubic-bezier(.22,.9,.32,1); animation-fill-mode: both; }
+    .menu-button{ width:85%; padding:20px; text-align:center; border-radius:18px; background: rgba(0,0,0,0.45); color:#f2f2f2; font-size:18px; font-weight:700; letter-spacing:1px; cursor:pointer; border:2px solid transparent; box-shadow:0 6px 18px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.02); transition: transform .22s ease, box-shadow .22s ease; }
+    .menu-container::before, .menu-container::after{ content:""; position:absolute; border-radius:33px; pointer-events:none; }
+    .menu-container::before{ top:-6px; left:-6px; right:-6px; bottom:-6px; z-index:-2; padding:6px; background-size:200% 200%; box-shadow: 0 0 25px rgba(0,0,0,0.15); animation: borderGradientShift 5s linear infinite; }
+    .menu-container::after{ inset:8px; z-index:-1; border-radius:24px; border:2px solid rgba(255,255,255,0.06); }
+
+    /* rift */
+    .rift { position:absolute; inset:-50%; pointer-events:none; z-index:1; }
+    .rift-line { position:absolute; width:220%; transform:rotate(-45deg); bottom:-40%; right:-60%; background-size:300% 100%; animation: riftMove 7s linear infinite; }
+    .rift-line.main { height:6px; background: linear-gradient(90deg, transparent, #ffffff, #e5e5e5, #bfbfbf, #e5e5e5, #ffffff, transparent); box-shadow: 0 0 30px rgba(255,255,255,0.9), 0 0 60px rgba(200,200,200,0.6); filter: blur(.6px); animation: riftMove 7s linear infinite, corruptionPulse 2.5s ease-in-out infinite; }
+
+    @keyframes menuFadeUp { 0% { opacity:0; transform: translateY(40px); } 60% { opacity:1; transform: translateY(-8px); } 100% { opacity:1; transform: translateY(0); } }
+    @keyframes borderGradientShift { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } 100% { background-position: 0% 0%; } }
+    @keyframes riftMove { 0% { transform: translate(0,0) rotate(-45deg); opacity:0; } 10% { opacity:1; } 100% { transform: translate(-55%,-55%) rotate(-45deg); opacity:0; } }
+    @keyframes corruptionPulse { 0% { background-position: 0% 50%; filter: blur(0.6px); } 100% { background-position: 300% 50%; filter: blur(1.2px); } }
+
+    /* animazioni esistenti */
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes float { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -5px); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ========== INTRO OVERLAY + LOGO RED ANIM ========== */
+    #intro-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none; /* non blocca layout visivo; JS userà pointer-events se serve */
     }
 
-    @keyframes float {
-      0%, 100% { transform: translate(-50%, 0); }
-      50% { transform: translate(-50%, -5px); }
+    /* contenitore del logo (centrato durante l'intro) */
+    #logo-red {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+      transform-origin: center;
+      will-change: transform, opacity;
+      /* parte nascosto */
+      opacity: 0;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
+    #logo-red img {
+      width: 140px;
+      height: 140px;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 8px 30px rgba(255,0,0,0.18));
+      border-radius: 12px;
     }
+
+    /* primo effetto: emergere 'dal buco' + piccola rotazione */
+    .anim-emerge {
+      animation: emerge 720ms cubic-bezier(.2,.9,.25,1) forwards;
+    }
+    @keyframes emerge {
+      0% { transform: translateY(36px) scale(0.12) rotate(0deg); opacity: 0; filter: blur(6px); }
+      60% { transform: translateY(-6px) scale(1.05) rotate(200deg); opacity: 1; filter: blur(0); }
+      100% { transform: translateY(0) scale(1) rotate(360deg); opacity: 1; filter: none; }
+    }
+
+    /* transizione di spostamento verso target (eseguita dinamicamente via js) */
+    .anim-move {
+      transition: transform 850ms cubic-bezier(.22,.9,.32,1), width 850ms, height 850ms, opacity 400ms;
+      will-change: transform;
+    }
+
+    /* dopo che è sistemato: piccolo ridimensionamento e rotazione lenta infinita */
+    .settled {
+      animation: slow-rotate 6s linear infinite;
+    }
+    @keyframes slow-rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* quando l'overlay deve sparire */
+    .overlay-fadeout {
+      animation: overlayFade 600ms ease forwards;
+    }
+    @keyframes overlayFade { to { opacity: 0; pointer-events: none; visibility: hidden; } }
   </style>
 </head>
 <body>
-  <div class="card">
+  <!-- INTRO OVERLAY (nera all'inizio) -->
+  <div id="intro-overlay" aria-hidden="true">
+    <div id="logo-red" role="img" aria-label="Logo">
+      <!-- Cambia questa src al percorso esatto del tuo asset "logo red" -->
+      <img id="logo-red-img" src="assets/logo-red.png" alt="Logo Red">
+    </div>
+  </div>
+
+  <!-- CONTENUTO PRINCIPALE -->
+  <div class="card" aria-live="polite">
     <img src="https://pack.ultrasmp.online/assets/omega-icon.png" alt="Omega Icon" class="omega">
     <div class="redirect-icon">
       <div class="redirect-arrow"></div>
@@ -132,5 +206,144 @@
     <h1>Reindirizzamento in corso...</h1>
     <p>Verifica della chiave salvata. Attendere...</p>
   </div>
+
+  <!-- optional rift line (visiva) -->
+  <div class="rift" aria-hidden="true">
+    <div class="rift-line main"></div>
+  </div>
+
+  <script>
+    /* ========== CONFIG: modifica qui il percorso del logo se serve ========== */
+    const LOGO_SRC = 'assets/logo-red.png'; // --> metti il percorso reale del tuo "logo red" (es. https://.../logo-red.png)
+
+    /* Redirect targets (copiato dal tuo script originale, ma eseguito DOPO l'anim) */
+    const root = "https://0ffalexis.github.io/";
+
+    function getTargetUrlFromPassword(pw) {
+      if (pw === "RPAdmin") return root + "Entities";
+      if (pw === "admin") return "https://www.youtube.com/watch?v=xvFZjo5PgG0";
+      return root + "verify";
+    }
+
+    /* funzione che esegue l'intro: emergere -> spin -> muovi -> settle -> svela pagina -> redirect */
+    function runIntroThenRedirect() {
+      const overlay = document.getElementById('intro-overlay');
+      const logoWrap = document.getElementById('logo-red');
+      const logoImg = document.getElementById('logo-red-img');
+
+      // assicurati che l'immagine sia quella giusta
+      if (LOGO_SRC) logoImg.src = LOGO_SRC;
+
+      // 1) emergi
+      logoWrap.classList.add('anim-emerge');
+
+      // dopo emergere, avvia la transizione di movimento
+      logoWrap.addEventListener('animationend', function onEmerge(e) {
+        if (e.animationName !== 'emerge') return;
+        logoWrap.removeEventListener('animationend', onEmerge);
+
+        // 2) scegli target (prima .omega, altrimenti .redirect-icon)
+        const target = document.querySelector('.omega') || document.querySelector('.redirect-icon');
+        if (!target) {
+          // fallback: solo rivelazione e redirect
+          overlay.classList.add('overlay-fadeout');
+          finalizeAndRedirect();
+          return;
+        }
+
+        // forza il repaint per assicurare transizioni fluide
+        void logoWrap.offsetWidth;
+        logoWrap.classList.add('anim-move');
+
+        // calcola spostamento da centro viewport alla posizione target
+        const logoRect = logoWrap.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+
+        // centro degli elementi
+        const logoCx = logoRect.left + logoRect.width / 2;
+        const logoCy = logoRect.top + logoRect.height / 2;
+        const targetCx = targetRect.left + targetRect.width / 2;
+        const targetCy = targetRect.top + targetRect.height / 2;
+
+        // delta
+        const dx = targetCx - logoCx;
+        const dy = targetCy - logoCy;
+
+        // scala finale (riduci un po' per adattarsi alla posizione)
+        const scale = Math.min(targetRect.width / logoRect.width, targetRect.height / logoRect.height, 0.6);
+
+        // applichiamo trasformazione (move + scale)
+        logoWrap.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+
+        // opzionale: rendi l'overlay pointer-events none per non bloccare
+        overlay.style.pointerEvents = 'none';
+
+        // quando termina la transizione, "fissiamo" il logo sopra il target e rimuoviamo overlay
+        const onTransitionEnd = () => {
+          logoWrap.removeEventListener('transitionend', onTransitionEnd);
+
+          // 3) sostituisci graficamente l'icona esistente: aggiorna src della .omega (così rimane anche dopo rimozione overlay)
+          if (target.classList.contains('omega') && target.tagName.toLowerCase() === 'img') {
+            // salva dimensioni preesistenti per non rompere layout
+            target.src = LOGO_SRC;
+            // opzionale: mantenere effetti (drop shadow)
+            // aggiungiamo una classe "settled" all'elemento logo in overlay per rotazione
+            logoWrap.classList.add('settled');
+
+            // sincronizza posizione: rimuoviamo overlay dopo breve ritardo e mettiamo animation lenta su target
+            setTimeout(() => {
+              overlay.classList.add('overlay-fadeout');
+              // aggiungi rotazione lenta anche alla .omega sostituita
+              target.style.animation = 'slow-rotate 6s linear infinite';
+              // rimuovi overlay dal DOM dopo animazione fade per pulizia
+              setTimeout(() => overlay.remove(), 700);
+              // dopo che la pagina è rivelata, esegui redirect (vedi finalizeAndRedirect)
+              finalizeAndRedirect();
+            }, 250);
+          } else {
+            // target non <img> (es. .redirect-icon) -> appendiamo il logo come elemento fisso sopra il target
+            // calcoliamo posizione assoluta e attacchiamo un clone nel DOM
+            const clone = logoImg.cloneNode(true);
+            clone.style.width = Math.max(32, targetRect.width) + 'px';
+            clone.style.height = 'auto';
+            clone.style.display = 'block';
+            // posizioniamo il clone assoluto nella stessa posizione del target
+            const fixed = document.createElement('div');
+            fixed.style.position = 'fixed';
+            fixed.style.left = (targetCx - (clone.width || 32)/2) + 'px';
+            fixed.style.top = (targetCy - (clone.height || 32)/2) + 'px';
+            fixed.style.transform = 'translate(-50%,-50%)';
+            fixed.style.zIndex = 9998;
+            fixed.appendChild(clone);
+            document.body.appendChild(fixed);
+
+            // fade overlay e dopo redirect
+            overlay.classList.add('overlay-fadeout');
+            setTimeout(() => overlay.remove(), 700);
+            finalizeAndRedirect();
+          }
+        };
+
+        logoWrap.addEventListener('transitionend', onTransitionEnd);
+      });
+    }
+
+    /* lettura password e preparazione redirect (esegui intro anche se password non impostata) */
+    function finalizeAndRedirect() {
+      // leggere password salvata (stessa regola di prima)
+      const password = localStorage.getItem('savedPassword');
+      const targetUrl = getTargetUrlFromPassword(password);
+      // piccolo delay per lasciare al visitatore vedere logo "settled" (oppure togliere il delay)
+      setTimeout(() => {
+        window.location.href = targetUrl;
+      }, 650); // questo valore è dentro il codice: se vuoi redirect immediato dopo fade, riducilo o impostalo a 0
+    }
+
+    // Start al DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      // avvia intro e poi redirect
+      runIntroThenRedirect();
+    });
+  </script>
 </body>
 </html>
