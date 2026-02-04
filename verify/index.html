@@ -184,6 +184,7 @@
       text-align: center;
     }
 
+    /* .omega: qui rimane come prima; verrà sostituita via JS durante l'animazione */
     .omega {
       position: absolute;
       top: -80px;
@@ -192,7 +193,7 @@
       height: 140px;
       transform: translateX(-50%);
       animation: float 6s ease-in-out infinite, rotate 20s linear infinite;
-      opacity: 0.9;
+      opacity: 0.95;
       filter: drop-shadow(0 0 12px rgba(124,77,255,0.3));
       z-index: 2;
     }
@@ -231,6 +232,7 @@
       justify-content: center;
       will-change: transform, opacity;
       opacity: 0;
+      z-index: 10000;
     }
 
     #logo-red img {
@@ -252,12 +254,12 @@
       100% { transform: translate(-50%, -50%) translateY(0)      scale(1)    rotate(360deg); opacity: 1; filter: none; }
     }
 
-    /* durante lo spostamento verso il target */
+    /* movimento verso .omega */
     .anim-move {
       transition: transform 850ms cubic-bezier(.22,.9,.32,1), width 850ms, height 850ms, opacity 400ms;
     }
 
-    /* quando "settled" la rotazione lenta */
+    /* quando "settled" la rotazione lenta (applied sulla .omega dopo il replace) */
     .settled {
       animation: slow-rotate 6s linear infinite;
     }
@@ -285,14 +287,15 @@
   <!-- INTRO OVERLAY -->
   <div id="intro-overlay" aria-hidden="true">
     <div id="logo-red" role="img" aria-label="Logo Red">
-      <!-- percorso fornito da te -->
-      <img id="logo-red-img" src="Assets/logo_red" alt="Logo Red">
+      <!-- percorso fornito da te (estensione .jpg) -->
+      <img id="logo-red-img" src="Assets/logo_red.jpg" alt="Logo Red">
     </div>
   </div>
 
-  <!-- CONTENT -->
+  <!-- CONTENT (VERIFICA) -->
   <div class="card" aria-live="polite">
     <br><br>
+    <!-- Manteniamo l'omega originale qui: sarà sostituita via JS dall'animazione -->
     <img src="https://pack.ultrasmp.online/assets/omega-icon.png" alt="Omega Icon" class="omega">
     <h1>Verifica la tua identità</h1>
     <p class="lead">Inserisci la chiave per accedere a questo sito.</p>
@@ -313,40 +316,39 @@
   </div>
 
   <script>
-    // percorso immagine come richiesto
-    const LOGO_SRC = 'Assets/logo_red';
+    // percorso immagine come richiesto (hai detto: Assets/logo_red.jpg)
+    const LOGO_SRC = 'Assets/logo_red.jpg';
 
-    // gestione intro che sostituisce la .omega con il logo red
+    // funzione che esegue l'intro e sostituisce la .omega al termine
     function runIntroReplaceOmega() {
       const overlay = document.getElementById('intro-overlay');
       const logoWrap = document.getElementById('logo-red');
       const logoImg = document.getElementById('logo-red-img');
 
-      // imposta src (se vuoi usare estensione diversa, cambiala qui)
+      // assicuriamoci che la src sia corretta
       if (LOGO_SRC) logoImg.src = LOGO_SRC;
 
       // avvia l'emersione
       logoWrap.classList.add('anim-emerge');
 
-      // quando l'emergere finisce, calcoliamo il movimento verso .omega
+      // dopo l'emerge, calcoliamo spostamento verso .omega
       logoWrap.addEventListener('animationend', function onEmerge(e) {
         if (e.animationName !== 'emerge') return;
         logoWrap.removeEventListener('animationend', onEmerge);
 
-        // target: l'elemento .omega (dovrebbe essere <img>)
         const target = document.querySelector('.omega');
 
         if (!target) {
-          // se non c'è target: svela la pagina e rimuovi overlay
+          // fallback: svela la pagina
           overlay.classList.add('overlay-fadeout');
           setTimeout(() => overlay.remove(), 700);
           return;
         }
 
-        // assicurati che la wrap sia in posizione fissata (già lo è), aggiungi classe per la transizione
+        // aggiungi transizione di movimento
         logoWrap.classList.add('anim-move');
 
-        // calcola bounding box
+        // bounding boxes
         const logoRect = logoWrap.getBoundingClientRect();
         const targetRect = target.getBoundingClientRect();
 
@@ -360,42 +362,45 @@
         const dx = Math.round(targetCx - logoCx);
         const dy = Math.round(targetCy - logoCy);
 
-        // scala finale (adatta al target evitando eccessi)
+        // scala finale (manteniamo proporzione)
         const scale = Math.min(targetRect.width / logoRect.width, targetRect.height / logoRect.height, 1);
 
-        // applica trasformazione (manteniamo il translate(-50%,-50%) di base e poi spostiamo)
+        // applica trasformazione (tenendo il translate(-50%,-50%) di base)
         logoWrap.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${scale})`;
 
-        // quando la transizione termina, sostituiamo la src di .omega e facciamo sparire overlay
-        const onTransitionEnd = (ev) => {
-          // possiamo ascoltare qualsiasi propertyTransition end - meglio rimuovere subito
+        // al termine della transition => sostituisci la .omega
+        const onTransitionEnd = () => {
           logoWrap.removeEventListener('transitionend', onTransitionEnd);
 
-          // sostituisci la .omega con il logo (visualmente)
+          // se target è immagine, sostituisci src e applica rotazione lenta
           if (target.tagName.toLowerCase() === 'img') {
-            // imposta src della .omega al nuovo logo
             target.src = LOGO_SRC;
-            // aggiungi la rotazione lenta alla .omega sostituita
             target.style.animation = 'slow-rotate 6s linear infinite';
+            target.style.filter = 'drop-shadow(0 10px 36px rgba(255,0,0,0.25))';
+            // assicurati che sia visibile
+            target.style.opacity = '1';
           } else {
-            // fallback: se target non è immagine, appendi il logo come overlay sopra il target
+            // fallback: appendi un clone sopra il target
             const clone = logoImg.cloneNode(true);
             clone.style.width = Math.max(32, targetRect.width) + 'px';
             clone.style.height = 'auto';
             clone.style.display = 'block';
-            target.parentElement.appendChild(clone);
-            clone.style.position = 'absolute';
-            clone.style.left = `${targetRect.left + targetRect.width/2}px`;
-            clone.style.top = `${targetRect.top + targetRect.height/2}px`;
+            clone.style.position = 'fixed';
+            clone.style.left = `${targetCx}px`;
+            clone.style.top = `${targetCy}px`;
             clone.style.transform = 'translate(-50%,-50%)';
-            clone.style.zIndex = 3;
+            clone.style.zIndex = 9998;
+            document.body.appendChild(clone);
+            clone.style.animation = 'slow-rotate 6s linear infinite';
           }
 
           // fade out overlay
           overlay.classList.add('overlay-fadeout');
 
-          // rimuovi overlay dal DOM dopo la fade
-          setTimeout(() => overlay.remove(), 700);
+          // rimuovi overlay dopo la fade
+          setTimeout(() => {
+            if (overlay && overlay.parentElement) overlay.parentElement.removeChild(overlay);
+          }, 700);
         };
 
         logoWrap.addEventListener('transitionend', onTransitionEnd);
@@ -404,13 +409,13 @@
 
     // Avvio all'evento DOMContentLoaded
     document.addEventListener('DOMContentLoaded', () => {
-      // lancia l'intro (puoi commentare questa riga per saltare l'animazione)
+      // lancia l'intro (commenta la riga sotto se vuoi saltarla)
       runIntroReplaceOmega();
     });
 
 
     /* =========================
-       LOGICA SALVATAGGIO / UI
+       LOGICA SALVATAGGIO / UI (invariata)
        ========================= */
     const STORAGE_KEY = 'savedPassword';
     let savedPasswordVar = null;
