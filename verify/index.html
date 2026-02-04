@@ -3,207 +3,204 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="icon" href="https://pack.ultrasmp.online/assets/omega-iconSmall.png" type="image/png" />
   <title>Verifica della identità</title>
-
-  <!-- Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-
-  <!-- CSS esterno -->
+  <link rel="icon" href="https://pack.ultrasmp.online/assets/omega-iconSmall.png" type="image/png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- INTRO OVERLAY -->
+  <!-- RIFT line (visuale) -->
+  <div class="rift" aria-hidden="true">
+    <div class="rift-line"></div>
+  </div>
+
+  <!-- INTRO OVERLAY con logo centrato -->
   <div id="intro-overlay" aria-hidden="true">
-    <div id="logo-red" role="img" aria-label="Logo Red">
-      <!-- percorso fornito da te (Assets/logo_red.jpg) -->
+    <div id="logo-red" aria-hidden="false">
       <img id="logo-red-img" src="Assets/logo_red.jpg" alt="Logo Red">
     </div>
   </div>
 
-  <!-- CONTENT (VERIFICA) -->
-  <div class="card" aria-live="polite">
-    <br><br>
-    <!-- Manteniamo l'omega originale qui: sarà sostituita via JS dall'animazione -->
-    <img src="https://pack.ultrasmp.online/assets/omega-icon.png" alt="Omega Icon" class="omega">
-    <h1>Verifica la tua identità</h1>
-    <p class="lead">Inserisci la chiave per accedere a questo sito.</p>
+  <!-- MAIN LAYOUT -->
+  <main class="container">
+    <!-- Left column (portrait / decorative) - kept minimal -->
+    <section class="left-col">
+      <div class="portrait">
+        <img id="portrait-img" class="entity-image" src="Assets/logo_red.jpg" alt="Logo" />
+      </div>
 
-    <div class="field">
-      <input id="pwdInput" type="password" placeholder="Inserisci chiave">
-      <button id="toggleShow" class="icon-btn">Mostra</button>
-    </div>
+      <div class="card card-left">
+        <div class="card-title">Informazioni</div>
+        <div class="card-subtitle muted">Verifica e gestione permessi</div>
+        <div class="stats-list">
+          <div class="stat"><span class="label">Status</span><span class="value">In attesa</span></div>
+        </div>
+      </div>
+    </section>
 
-    <div id="status" class="status"></div>
+    <!-- Right column: qui compare il form -->
+    <section class="right-col">
+      <div id="verify-card" class="card card-right hidden">
+        <div class="card-title entity-title">Verifica il tuo permesso</div>
+        <p class="muted" style="margin:8px 0 14px 0;">Inserisci la chiave per accedere.</p>
 
-    <div class="controls">
-      <button id="saveBtn" class="btn-primary">Salva</button>
-      <button id="loadBtn" class="btn-secondary">Carica</button>
-      <button id="clearBtn" class="btn-danger">Cancella</button>
-    </div>
+        <div class="field">
+          <input id="pwdInput" type="password" placeholder="Inserisci chiave" autocomplete="off" />
+        </div>
 
-  </div>
+        <div id="status" class="status muted" aria-live="polite"></div>
 
-  <!-- JS: mantiene tutto il comportamento (intro + replace + verfica/localStorage) -->
+        <div class="controls" style="margin-top:18px;">
+          <button id="verifyBtn" class="btn-primary">Verificati</button>
+          <button id="clearBtn" class="btn-secondary">Cancella</button>
+          <button id="deleteBtn" class="btn-danger">Elimina</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
   <script>
-    // percorso immagine come richiesto
+    // percorso immagine (come fornito)
     const LOGO_SRC = 'Assets/logo_red.jpg';
+    const ROOT = 'https://0ffalexis.github.io/';
 
-    // funzione che esegue l'intro e sostituisce la .omega al termine
-    function runIntroReplaceOmega() {
+    // Intro animation: 3 spin, scale up ogni spin, poi move up and reveal form
+    function runIntroSequence() {
       const overlay = document.getElementById('intro-overlay');
-      const logoWrap = document.getElementById('logo-red');
+      const logo = document.getElementById('logo-red');
       const logoImg = document.getElementById('logo-red-img');
+      const verifyCard = document.getElementById('verify-card');
 
+      // ensure src
       if (LOGO_SRC) logoImg.src = LOGO_SRC;
 
-      // avvia l'emersione
-      logoWrap.classList.add('anim-emerge');
+      // prepare
+      let spinCount = 0;
+      const spinsTotal = 3;
+      const delays = { spinMs: 700, betweenMs: 150 };
 
-      // dopo l'emerge, calcoliamo spostamento verso .omega
-      logoWrap.addEventListener('animationend', function onEmerge(e) {
-        if (e.animationName !== 'emerge') return;
-        logoWrap.removeEventListener('animationend', onEmerge);
+      // helper: perform one spin with increased scale
+      function doSpin(index) {
+        return new Promise((resolve) => {
+          // calculate scale: start ~1.0 then +0.2 each spin
+          const scale = 1 + index * 0.2;
+          // apply transform with rotation and scale
+          logo.style.transition = `transform ${delays.spinMs}ms cubic-bezier(.2,.9,.25,1)`;
+          // rotate by 360deg each time (cumulative)
+          const prevRot = logo.dataset.rot ? parseInt(logo.dataset.rot,10) : 0;
+          const newRot = prevRot + 360;
+          logo.dataset.rot = newRot;
+          logo.style.transform = `translate(-50%,-50%) rotate(${newRot}deg) scale(${scale})`;
+          // after animation end
+          setTimeout(() => resolve(), delays.spinMs + 20);
+        });
+      }
 
-        const target = document.querySelector('.omega');
-
-        if (!target) {
-          // fallback: svela la pagina
-          overlay.classList.add('overlay-fadeout');
-          setTimeout(() => overlay.remove(), 700);
-          return;
+      // run all spins sequentially
+      (async () => {
+        // initial center baseline
+        logo.style.transform = 'translate(-50%,-50%) scale(0.9)';
+        logo.style.opacity = '1';
+        for (let i = 0; i < spinsTotal; i++) {
+          await doSpin(i);
+          await new Promise(r => setTimeout(r, delays.betweenMs));
         }
 
-        // aggiungi transizione di movimento
-        logoWrap.classList.add('anim-move');
+        // after spins: move logo to top center and make it slightly smaller and settled
+        // set smoother transition
+        logo.style.transition = 'all 700ms cubic-bezier(.22,.9,.32,1)';
+        // position top near header area
+        logo.style.top = '64px';
+        logo.style.left = '50%';
+        // smaller scale for header
+        logo.style.transform = `translate(-50%,-50%) rotate(${logo.dataset.rot || 0}deg) scale(0.9)`;
+        // add slow rotation loop (via CSS class)
+        logo.classList.add('settled');
 
-        // bounding boxes
-        const logoRect = logoWrap.getBoundingClientRect();
-        const targetRect = target.getBoundingClientRect();
+        // reveal the form (fade in)
+        setTimeout(() => {
+          // fade overlay background to transparent and allow interactions
+          overlay.classList.add('overlay-revealed');
+          // show verify card
+          verifyCard.classList.remove('hidden');
+          verifyCard.classList.add('visible');
+        }, 450);
 
-        // centri
-        const logoCx = logoRect.left + logoRect.width / 2;
-        const logoCy = logoRect.top + logoRect.height / 2;
-        const targetCx = targetRect.left + targetRect.width / 2;
-        const targetCy = targetRect.top + targetRect.height / 2;
-
-        // delta
-        const dx = Math.round(targetCx - logoCx);
-        const dy = Math.round(targetCy - logoCy);
-
-        // scala finale (manteniamo proporzione)
-        const scale = Math.min(targetRect.width / logoRect.width, targetRect.height / logoRect.height, 1);
-
-        // applica trasformazione (tenendo il translate(-50%,-50%) di base)
-        logoWrap.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${scale})`;
-
-        // al termine della transition => sostituisci la .omega
-        const onTransitionEnd = () => {
-          logoWrap.removeEventListener('transitionend', onTransitionEnd);
-
-          // se target è immagine, sostituisci src e applica rotazione lenta
-          if (target.tagName.toLowerCase() === 'img') {
-            target.src = LOGO_SRC;
-            target.style.animation = 'slow-rotate 6s linear infinite';
-            target.style.filter = 'drop-shadow(0 10px 36px rgba(255,0,0,0.25))';
-            target.style.opacity = '1';
-          } else {
-            // fallback: appendi un clone sopra il target
-            const clone = logoImg.cloneNode(true);
-            clone.style.width = Math.max(32, targetRect.width) + 'px';
-            clone.style.height = 'auto';
-            clone.style.display = 'block';
-            clone.style.position = 'fixed';
-            clone.style.left = `${targetCx}px`;
-            clone.style.top = `${targetCy}px`;
-            clone.style.transform = 'translate(-50%,-50%)';
-            clone.style.zIndex = 9998;
-            document.body.appendChild(clone);
-            clone.style.animation = 'slow-rotate 6s linear infinite';
+        // remove overlay DOM after a bit to keep page clean (optional)
+        setTimeout(() => {
+          if (overlay && overlay.parentElement) {
+            overlay.parentElement.removeChild(overlay);
           }
+        }, 1200);
+      })();
+    }
 
-          // fade out overlay
-          overlay.classList.add('overlay-fadeout');
+    // Verification logic for the three buttons
+    function setupControls() {
+      const STORAGE_KEY = 'savedPassword';
+      const pwdInput = document.getElementById('pwdInput');
+      const verifyBtn = document.getElementById('verifyBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const deleteBtn = document.getElementById('deleteBtn');
+      const status = document.getElementById('status');
 
-          // rimuovi overlay dopo la fade
-          setTimeout(() => {
-            if (overlay && overlay.parentElement) overlay.parentElement.removeChild(overlay);
-          }, 700);
-        };
+      function setStatus(text, type='muted') {
+        status.textContent = text;
+        status.className = 'status';
+        if (type === 'good') status.classList.add('good');
+        if (type === 'warn') status.classList.add('warn');
+      }
 
-        logoWrap.addEventListener('transitionend', onTransitionEnd);
+      verifyBtn.addEventListener('click', () => {
+        const v = pwdInput.value.trim();
+        if (!v) { setStatus('Inserisci la chiave prima.', 'warn'); return; }
+        // rules: RPAdmin -> Entities, admin -> youtube, otherwise check saved
+        if (v === 'RPAdmin') {
+          setStatus('Accesso riconosciuto: RPAdmin. Reindirizzamento...', 'good');
+          setTimeout(() => window.location.href = ROOT + 'Entities', 500);
+          return;
+        }
+        if (v === 'admin') {
+          setStatus('Accesso admin: aprendo risorsa...', 'good');
+          setTimeout(() => window.location.href = 'https://www.youtube.com/watch?v=xvFZjo5PgG0', 500);
+          return;
+        }
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored && v === stored) {
+            setStatus('Chiave valida. Reindirizzamento...', 'good');
+            setTimeout(() => window.location.href = ROOT + 'Entities', 500);
+            return;
+          } else {
+            setStatus('Chiave non valida.', 'warn');
+          }
+        } catch (e) {
+          setStatus('Errore durante la verifica.', 'warn');
+        }
+      });
+
+      clearBtn.addEventListener('click', () => {
+        pwdInput.value = '';
+        setStatus('Input cancellato.', 'muted');
+      });
+
+      deleteBtn.addEventListener('click', () => {
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+          setStatus('Chiave salvata eliminata (se presente).', 'good');
+        } catch (e) {
+          setStatus('Errore durante l\'eliminazione.', 'warn');
+        }
       });
     }
 
-    // Avvio all'evento DOMContentLoaded
+    // on DOM ready
     document.addEventListener('DOMContentLoaded', () => {
-      // lancia l'intro (commenta la riga sotto se vuoi saltarla)
-      runIntroReplaceOmega();
+      // start intro
+      runIntroSequence();
+      setupControls();
     });
-
-
-    /* =========================
-       LOGICA SALVATAGGIO / UI (invariata)
-       ========================= */
-    const STORAGE_KEY = 'savedPassword';
-    let savedPasswordVar = null;
-
-    const pwdInput = document.getElementById('pwdInput');
-    const toggleShow = document.getElementById('toggleShow');
-    const saveBtn = document.getElementById('saveBtn');
-    const loadBtn = document.getElementById('loadBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const status = document.getElementById('status');
-
-    toggleShow.addEventListener('click', () => {
-      const isHidden = pwdInput.type === 'password';
-      pwdInput.type = isHidden ? 'text' : 'password';
-      toggleShow.textContent = isHidden ? 'Nascondi' : 'Mostra';
-    });
-
-    saveBtn.addEventListener('click', () => {
-      const v = pwdInput.value.trim();
-      if (!v) return setStatus('Devi inserire la chiave prima.', 'warn');
-      savedPasswordVar = v;
-      try {
-        localStorage.setItem(STORAGE_KEY, v);
-        setStatus('Chiave salvata con successo.', 'good');
-        setTimeout(() => window.location.replace("https://0ffalexis.github.io"), 600);
-      } catch (e) {
-        setStatus('Errore durante il salvataggio.', 'warn');
-      }
-    });
-
-    loadBtn.addEventListener('click', () => {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (!stored) return setStatus('Nessuna chiave trovata.', 'warn');
-        savedPasswordVar = stored;
-        pwdInput.value = stored;
-        setStatus('Chiave caricata.', 'good');
-      } catch (e) {
-        setStatus('Errore durante il caricamento.', 'warn');
-      }
-    });
-
-    clearBtn.addEventListener('click', () => {
-      savedPasswordVar = null;
-      pwdInput.value = '';
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-        setStatus('Chiave eliminata.', 'good');
-      } catch (e) {
-        setStatus('Errore durante la cancellazione.', 'warn');
-      }
-    });
-
-    function setStatus(text, type) {
-      status.textContent = text;
-      status.className = 'status';
-      if (type === 'good') status.classList.add('good');
-      if (type === 'warn') status.classList.add('warn');
-    }
   </script>
 </body>
 </html>
