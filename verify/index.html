@@ -24,9 +24,10 @@
 
   <!-- MAIN LAYOUT -->
   <main class="container">
-    <!-- Left column (portrait / decorative) - kept minimal -->
+    <!-- Left column (portrait / decorative) -->
     <section class="left-col">
       <div class="portrait">
+        <!-- rimane il logo come immagine a sinistra (non background) -->
         <img id="portrait-img" class="entity-image" src="Assets/logo_red.jpg" alt="Logo" />
       </div>
 
@@ -75,64 +76,57 @@
       // ensure src
       if (LOGO_SRC) logoImg.src = LOGO_SRC;
 
-      // prepare
-      let spinCount = 0;
+      // prepare vars
       const spinsTotal = 3;
-      const delays = { spinMs: 700, betweenMs: 150 };
+      const spinDuration = 700;
+      const betweenDelay = 140;
 
-      // helper: perform one spin with increased scale
+      logo.style.opacity = '1';
+      logo.dataset.rot = '0';
+
+      // helper for single spin
       function doSpin(index) {
-        return new Promise((resolve) => {
-          // calculate scale: start ~1.0 then +0.2 each spin
-          const scale = 1 + index * 0.2;
-          // apply transform with rotation and scale
-          logo.style.transition = `transform ${delays.spinMs}ms cubic-bezier(.2,.9,.25,1)`;
-          // rotate by 360deg each time (cumulative)
-          const prevRot = logo.dataset.rot ? parseInt(logo.dataset.rot,10) : 0;
+        return new Promise(resolve => {
+          const scale = 1 + index * 0.25; // cresce ogni spin
+          const prevRot = parseInt(logo.dataset.rot || '0', 10);
           const newRot = prevRot + 360;
-          logo.dataset.rot = newRot;
+          logo.dataset.rot = String(newRot);
+          // usa transition per rotazione+scale
+          logo.style.transition = `transform ${spinDuration}ms cubic-bezier(.2,.9,.25,1)`;
           logo.style.transform = `translate(-50%,-50%) rotate(${newRot}deg) scale(${scale})`;
-          // after animation end
-          setTimeout(() => resolve(), delays.spinMs + 20);
+          setTimeout(() => resolve(), spinDuration + 20);
         });
       }
 
-      // run all spins sequentially
       (async () => {
-        // initial center baseline
+        // inizializzazione leggermente più piccola
         logo.style.transform = 'translate(-50%,-50%) scale(0.9)';
-        logo.style.opacity = '1';
+        // esegui i 3 spin
         for (let i = 0; i < spinsTotal; i++) {
           await doSpin(i);
-          await new Promise(r => setTimeout(r, delays.betweenMs));
+          await new Promise(r => setTimeout(r, betweenDelay));
         }
 
-        // after spins: move logo to top center and make it slightly smaller and settled
-        // set smoother transition
+        // dopo gli spin: sposta il logo in alto e fissalo
         logo.style.transition = 'all 700ms cubic-bezier(.22,.9,.32,1)';
-        // position top near header area
-        logo.style.top = '64px';
+        logo.style.top = '64px';              // posizione alta rispetto al centro
         logo.style.left = '50%';
-        // smaller scale for header
-        logo.style.transform = `translate(-50%,-50%) rotate(${logo.dataset.rot || 0}deg) scale(0.9)`;
-        // add slow rotation loop (via CSS class)
+        // scala finale (un po' grande ma non gigante)
+        logo.style.transform = `translate(-50%,-50%) rotate(${logo.dataset.rot || 0}deg) scale(1)`;
+        // applica rotazione continua con classe settled
         logo.classList.add('settled');
 
-        // reveal the form (fade in)
+        // rimuovi overlay scurente e mostra il form (alzandolo leggermente)
         setTimeout(() => {
-          // fade overlay background to transparent and allow interactions
           overlay.classList.add('overlay-revealed');
-          // show verify card
           verifyCard.classList.remove('hidden');
           verifyCard.classList.add('visible');
-        }, 450);
+        }, 420);
 
-        // remove overlay DOM after a bit to keep page clean (optional)
+        // elimina overlay dal DOM (opzionale) dopo che è trasparente
         setTimeout(() => {
-          if (overlay && overlay.parentElement) {
-            overlay.parentElement.removeChild(overlay);
-          }
-        }, 1200);
+          if (overlay && overlay.parentElement) overlay.parentElement.removeChild(overlay);
+        }, 1100);
       })();
     }
 
@@ -155,7 +149,6 @@
       verifyBtn.addEventListener('click', () => {
         const v = pwdInput.value.trim();
         if (!v) { setStatus('Inserisci la chiave prima.', 'warn'); return; }
-        // rules: RPAdmin -> Entities, admin -> youtube, otherwise check saved
         if (v === 'RPAdmin') {
           setStatus('Accesso riconosciuto: RPAdmin. Reindirizzamento...', 'good');
           setTimeout(() => window.location.href = ROOT + 'Entities', 500);
@@ -197,7 +190,6 @@
 
     // on DOM ready
     document.addEventListener('DOMContentLoaded', () => {
-      // start intro
       runIntroSequence();
       setupControls();
     });
