@@ -10,41 +10,21 @@
 </head>
 <body>
 
-  <!-- RIFT line (visuale) -->
-  <div class="rift" aria-hidden="true">
-    <div class="rift-line"></div>
-  </div>
-
-  <!-- INTRO OVERLAY con logo centrato -->
+  <!-- INTRO OVERLAY con logo centrato (rimane nel DOM e poi diventa trasparente) -->
   <div id="intro-overlay" aria-hidden="true">
     <div id="logo-red" aria-hidden="false">
       <img id="logo-red-img" src="Assets/logo_red.jpg" alt="Logo Red">
     </div>
   </div>
 
-  <!-- MAIN LAYOUT -->
-  <main class="container">
-    <!-- Left column (portrait / decorative) -->
-    <section class="left-col">
-      <div class="portrait">
-        <!-- rimane il logo come immagine a sinistra (non background) -->
-        <img id="portrait-img" class="entity-image" src="Assets/logo_red.jpg" alt="Logo" />
-      </div>
-
-      <div class="card card-left">
-        <div class="card-title">Informazioni</div>
-        <div class="card-subtitle muted">Verifica e gestione permessi</div>
-        <div class="stats-list">
-          <div class="stat"><span class="label">Status</span><span class="value">In attesa</span></div>
+  <!-- MAIN: card centrata (menu compatto & elegante) -->
+  <main class="main-wrap">
+    <section class="verify-wrapper">
+      <div id="verify-card" class="card card-center hidden">
+        <div class="card-top">
+          <div class="card-title">Verifica il tuo permesso</div>
+          <p class="card-sub muted">Inserisci la chiave per accedere.</p>
         </div>
-      </div>
-    </section>
-
-    <!-- Right column: qui compare il form -->
-    <section class="right-col">
-      <div id="verify-card" class="card card-right hidden">
-        <div class="card-title entity-title">Verifica il tuo permesso</div>
-        <p class="muted" style="margin:8px 0 14px 0;">Inserisci la chiave per accedere.</p>
 
         <div class="field">
           <input id="pwdInput" type="password" placeholder="Inserisci chiave" autocomplete="off" />
@@ -52,7 +32,7 @@
 
         <div id="status" class="status muted" aria-live="polite"></div>
 
-        <div class="controls" style="margin-top:18px;">
+        <div class="controls" style="margin-top:14px;">
           <button id="verifyBtn" class="btn-primary">Verificati</button>
           <button id="clearBtn" class="btn-secondary">Cancella</button>
           <button id="deleteBtn" class="btn-danger">Elimina</button>
@@ -87,11 +67,11 @@
       // helper for single spin
       function doSpin(index) {
         return new Promise(resolve => {
-          const scale = 1 + index * 0.25; // cresce ogni spin
+          const scale = 1 + index * 0.28; // cresce ogni spin
           const prevRot = parseInt(logo.dataset.rot || '0', 10);
           const newRot = prevRot + 360;
           logo.dataset.rot = String(newRot);
-          // usa transition per rotazione+scale
+          // use transition for smooth spin+scale
           logo.style.transition = `transform ${spinDuration}ms cubic-bezier(.2,.9,.25,1)`;
           logo.style.transform = `translate(-50%,-50%) rotate(${newRot}deg) scale(${scale})`;
           setTimeout(() => resolve(), spinDuration + 20);
@@ -99,38 +79,35 @@
       }
 
       (async () => {
-        // inizializzazione leggermente più piccola
+        // initial slightly smaller
         logo.style.transform = 'translate(-50%,-50%) scale(0.9)';
-        // esegui i 3 spin
+
+        // do the spins
         for (let i = 0; i < spinsTotal; i++) {
           await doSpin(i);
           await new Promise(r => setTimeout(r, betweenDelay));
         }
 
-        // dopo gli spin: sposta il logo in alto e fissalo
+        // after spins: move logo to top and fix it there, keep it rotating forever
         logo.style.transition = 'all 700ms cubic-bezier(.22,.9,.32,1)';
-        logo.style.top = '64px';              // posizione alta rispetto al centro
+        logo.style.top = '40px';      // posizione alta
         logo.style.left = '50%';
-        // scala finale (un po' grande ma non gigante)
         logo.style.transform = `translate(-50%,-50%) rotate(${logo.dataset.rot || 0}deg) scale(1)`;
-        // applica rotazione continua con classe settled
-        logo.classList.add('settled');
+        logo.classList.add('settled'); // adds slow infinite rotation via CSS
 
-        // rimuovi overlay scurente e mostra il form (alzandolo leggermente)
+        // reveal the form (centered and slightly raised)
         setTimeout(() => {
-          overlay.classList.add('overlay-revealed');
+          overlay.classList.add('overlay-revealed'); // makes overlay transparent but logo stays
           verifyCard.classList.remove('hidden');
           verifyCard.classList.add('visible');
         }, 420);
 
-        // elimina overlay dal DOM (opzionale) dopo che è trasparente
-        setTimeout(() => {
-          if (overlay && overlay.parentElement) overlay.parentElement.removeChild(overlay);
-        }, 1100);
+        // keep overlay in the DOM (so logo remains interactive/visible above everything)
+        // (no removal)
       })();
     }
 
-    // Verification logic for the three buttons
+    // Button logic
     function setupControls() {
       const STORAGE_KEY = 'savedPassword';
       const pwdInput = document.getElementById('pwdInput');
@@ -188,7 +165,6 @@
       });
     }
 
-    // on DOM ready
     document.addEventListener('DOMContentLoaded', () => {
       runIntroSequence();
       setupControls();
