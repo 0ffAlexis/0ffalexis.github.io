@@ -2,16 +2,17 @@
 * { box-sizing: border-box; margin:0; padding:0; font-family: "Segoe UI", sans-serif; }
 :root{
     --bg-1: #000;
-    --bg-2: #0f0f0f;
-    --bg-3: #2a2a2a;
-    --accent: #00d8ff;
+    --bg-2: #120000; /* dark red */
+    --bg-3: #2a0000; /* deeper red */
+    --accent: #ff3b3b;
     --muted: #bfc3c6;
-    --card-bg: rgba(0,0,0,0.62);
-    --glass-border: rgba(255,255,255,0.04);
+    --card-bg: rgba(20,0,0,0.65);
+    --glass-border: rgba(255,255,255,0.03);
 }
 html,body { height:100%; }
 body {
     min-height:100vh;
+    /* sfondo nero -> rosso gradiente */
     background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 45%, var(--bg-3) 100%);
     display:flex;
     justify-content:center;
@@ -22,21 +23,21 @@ body {
     -webkit-font-smoothing:antialiased;
 }
 
-/* INITIAL B/W FADE-IN OVERLAY (stays as final state) */
+/* INITIAL B/W FADE-IN OVERLAY (switch to red tones) */
 body::before{
     content:"";
     position:fixed;
     inset:0;
     z-index:0;
     pointer-events:none;
-    background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.0) 45%);
+    background: linear-gradient(180deg, rgba(255,0,0,0.06) 0%, rgba(0,0,0,0.0) 45%);
     mix-blend-mode: saturation;
     opacity:0;
     animation: bwFadeIn 0.95s ease-out 0.06s forwards;
 }
 @keyframes bwFadeIn { 0% { opacity:0 } 60% { opacity:0.9 } 100% { opacity:1 } }
 
-/* RIFT line */
+/* RIFT line (reddish shimmer) */
 .rift { position: fixed; right: 0; bottom: 0; width: 0; height: 0; pointer-events: none; z-index: 1; overflow: visible; }
 .rift-line {
     position: absolute;
@@ -46,9 +47,9 @@ body::before{
     height: 6px;
     transform-origin: right bottom;
     transform: rotate(-45deg) translate(0, 0);
-    background: linear-gradient(90deg, transparent, #ffffff, #e5e5e5, #bfbfbf, #e5e5e5, #ffffff, transparent);
+    background: linear-gradient(90deg, transparent, #ff9b9b, #ffd1d1, #ff9b9b, transparent);
     background-size: 300% 100%;
-    box-shadow: 0 0 30px rgba(255,255,255,0.9);
+    box-shadow: 0 0 30px rgba(255,80,80,0.75);
     filter: blur(.6px);
     animation: riftMove 7s linear infinite, corruptionPulse 3.2s ease-in-out infinite;
     will-change: transform, opacity, background-position;
@@ -59,7 +60,7 @@ body::before{
     inset: 0;
     z-index: 2;
     pointer-events: none;
-    background: linear-gradient(90deg, transparent 0%, rgba(0,220,255,0.22) 18%, rgba(0,180,220,0.18) 40%, rgba(0,120,160,0.12) 60%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(255,60,60,0.18) 18%, rgba(200,30,30,0.12) 40%, transparent 100%);
     opacity: 0;
     mix-blend-mode: screen;
     animation: riftToCyan 1.05s ease-out 0.08s forwards;
@@ -81,19 +82,14 @@ body::before{
     width:320px; height:320px; max-width:100%;
     border-radius:12px; object-fit:cover; display:block;
     border: 4px solid rgba(255,255,255,0.04);
-    box-shadow: 0 18px 46px rgba(0,0,0,0.6), 0 0 26px rgba(0,0,0,0.45);
-    background: linear-gradient(180deg,#222,#111);
+    box-shadow: 0 18px 46px rgba(0,0,0,0.6), 0 0 26px rgba(80,0,0,0.45);
+    background: linear-gradient(180deg,#220000,#110000);
     opacity:0; transform: translateY(18px) scale(.98);
     transition: transform .36s cubic-bezier(.2,.9,.3,1), opacity .36s;
     animation: imageFadeIn .92s cubic-bezier(.22,.9,.32,1) 0.12s forwards;
 }
-@keyframes imageFadeIn {
-    0% { opacity:0; transform: translateY(18px) scale(.98); }
-    60% { opacity:1; transform: translateY(-6px) scale(1.02); }
-    100% { opacity:1; transform: translateY(0) scale(1); }
-}
 
-/* Card base */
+/* Card base (red themed) */
 .card { background: var(--card-bg); border-radius:12px; padding:16px; color:#eee; width:100%;
     border:1px solid var(--glass-border); box-shadow: 0 10px 28px rgba(0,0,0,0.6);
     opacity:0; transform: translateY(18px) scale(.995); animation: cardFadeIn .88s both;
@@ -102,6 +98,7 @@ body::before{
 .card-right { animation-delay: 0.46s; }
 .card-title { color:#fff; font-size:18px; margin-bottom:10px; }
 .card-subtitle { color:#fff; margin:6px 0 8px 0; }
+
 @keyframes cardFadeIn { 0% { opacity:0; transform: translateY(18px) scale(.995) } 60% { opacity:1; transform: translateY(-6px) scale(1.01) } 100% { opacity:1; transform: translateY(0) scale(1) } }
 
 .stats-list { display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
@@ -123,24 +120,27 @@ button {
     cursor: pointer;
     transition: transform .16s, box-shadow .16s;
 }
-.btn-primary { background: linear-gradient(90deg, var(--accent), #00a9d6); color:#001; box-shadow: 0 10px 28px rgba(0,200,255,0.06); }
+
+/* BUTTON THEMES: rosse / neutre */
+.btn-primary { background: linear-gradient(90deg, var(--accent), #ff6b6b); color:#111; box-shadow: 0 10px 28px rgba(255,60,60,0.08); }
+.btn-primary:hover { transform: translateY(-3px); }
 .btn-secondary { background: rgba(255,255,255,0.04); color:var(--muted); border:1px solid rgba(255,255,255,0.02); }
-.btn-danger { background: linear-gradient(180deg, rgba(255,40,60,0.08), rgba(255,20,30,0.06)); color:#ffbdbd; border:1px solid rgba(255,40,60,0.06); }
+.btn-danger { background: linear-gradient(180deg, rgba(255,20,20,0.12), rgba(180,0,0,0.08)); color:#ffdddd; border:1px solid rgba(255,20,20,0.06); }
 
 /* status */
 .status { margin-top:8px; font-size:0.95rem; color:var(--muted); }
 .status.good { color:#4cd964; }
 .status.warn { color:#ff3b30; }
 
-/* hidden/visible helpers */
-.hidden { opacity:0; transform: translateY(10px) scale(.995); pointer-events:none; }
-.visible { opacity:1; transform: translateY(0) scale(1); pointer-events:auto; transition: all .46s cubic-bezier(.2,.9,.25,1); }
+/* hidden/visible helpers - when visible, the card is slightly raised (menu alzato) */
+.hidden { opacity:0; transform: translateY(14px) scale(.995); pointer-events:none; }
+.visible { opacity:1; transform: translateY(-14px) scale(1); pointer-events:auto; transition: all .46s cubic-bezier(.2,.9,.25,1); }
 
 /* ===== LOGO INTRO STYLES ===== */
 #intro-overlay {
   position: fixed;
   inset: 0;
-  background: #000;
+  background: linear-gradient(180deg, rgba(0,0,0,1), rgba(40,0,0,0.95));
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -153,8 +153,8 @@ button {
   position: fixed;
   left: 50%;
   top: 50%;
-  width: 220px;
-  height: 220px;
+  width: 260px;
+  height: 260px;
   transform: translate(-50%,-50%) scale(0.9);
   display:flex;
   align-items:center;
@@ -163,9 +163,15 @@ button {
   opacity:1;
   transition: all 600ms cubic-bezier(.22,.9,.32,1);
 }
-#logo-red img { width: 140px; height: 140px; object-fit:contain; border-radius:12px; filter: drop-shadow(0 12px 36px rgba(0,220,255,0.08)); }
+#logo-red img {
+  width: 180px;
+  height: 180px;
+  object-fit:contain;
+  border-radius:14px;
+  filter: drop-shadow(0 14px 50px rgba(255,40,40,0.18));
+}
 
-/* settled slow rotation */
+/* settled slow rotation BUT preserves translate positioning */
 .settled { animation: slow-rotate 6s linear infinite; }
 @keyframes slow-rotate { from { transform: translate(-50%,-50%) rotate(0deg) } to { transform: translate(-50%,-50%) rotate(360deg) } }
 
@@ -175,6 +181,6 @@ button {
     .portrait { justify-content:center; }
     .entity-image { width:260px; height:260px; }
     .attacks-grid { grid-template-columns: 1fr; }
-    #logo-red { width: 160px; height:160px; }
-    #logo-red img { width: 110px; height:110px; }
+    #logo-red { width: 180px; height:180px; }
+    #logo-red img { width: 120px; height:120px; }
 }
