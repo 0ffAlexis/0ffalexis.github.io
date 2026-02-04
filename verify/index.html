@@ -10,7 +10,10 @@
 </head>
 <body>
 
-  <!-- INTRO OVERLAY con logo centrato (rimane nel DOM e poi diventa trasparente) -->
+  <!-- CANVAS RAIN (sotto tutti gli elementi) -->
+  <canvas id="rain-canvas" aria-hidden="true"></canvas>
+
+  <!-- INTRO OVERLAY con logo (rimane nel DOM e poi diventa trasparente ma logo resta) -->
   <div id="intro-overlay" aria-hidden="true">
     <div id="logo-red" aria-hidden="false">
       <img id="logo-red-img" src="Assets/logo_red.jpg" alt="Logo Red">
@@ -20,9 +23,9 @@
   <!-- MAIN: card centrata (menu compatto & elegante) -->
   <main class="main-wrap">
     <section class="verify-wrapper">
-      <div id="verify-card" class="card card-center hidden">
+      <div id="verify-card" class="card card-center hidden" role="form" aria-labelledby="verify-title">
         <div class="card-top">
-          <div class="card-title">Verifica il tuo permesso</div>
+          <div id="verify-title" class="card-title">Verifica il tuo permesso</div>
           <p class="card-sub muted">Inserisci la chiave per accedere.</p>
         </div>
 
@@ -42,11 +45,77 @@
   </main>
 
   <script>
-    // percorso immagine (come fornito)
+    // CONFIG
     const LOGO_SRC = 'Assets/logo_red.jpg';
     const ROOT = 'https://0ffalexis.github.io/';
 
-    // Intro animation: 3 spin, scale up ogni spin, poi move up and reveal form
+    /* =========================
+       RAIN (canvas) - subtle, performant
+       ========================= */
+    (function initRain() {
+      const canvas = document.getElementById('rain-canvas');
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = innerWidth;
+      let h = canvas.height = innerHeight;
+      const drops = [];
+      const dropCount = Math.round((w * h) / 70000); // scale with screen area
+
+      function resetSize() {
+        w = canvas.width = innerWidth;
+        h = canvas.height = innerHeight;
+      }
+      window.addEventListener('resize', resetSize);
+
+      function init() {
+        drops.length = 0;
+        for (let i = 0; i < dropCount; i++) {
+          drops.push(createDrop());
+        }
+      }
+      function createDrop() {
+        // start above screen, random x, speed based on length
+        const x = Math.random() * w;
+        const y = Math.random() * -h;
+        const length = 8 + Math.random() * 18;
+        const speed = 180 + Math.random() * 300;
+        const opacity = 0.06 + Math.random() * 0.12;
+        return { x, y, length, speed, opacity };
+      }
+
+      let last = performance.now();
+      function frame(now) {
+        const dt = (now - last) / 1000;
+        last = now;
+        ctx.clearRect(0, 0, w, h);
+
+        // draw subtle dark-red raindrops (thin)
+        for (let i = 0; i < drops.length; i++) {
+          const d = drops[i];
+          d.y += d.speed * dt;
+          if (d.y - d.length > h) {
+            // respawn top
+            drops[i] = createDrop();
+            drops[i].y = -10 - Math.random() * 200;
+            continue;
+          }
+          // line
+          ctx.beginPath();
+          ctx.moveTo(d.x, d.y);
+          ctx.lineTo(d.x - d.length * 0.08, d.y - d.length);
+          ctx.strokeStyle = `rgba(180,30,30,${d.opacity})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+        requestAnimationFrame(frame);
+      }
+
+      init();
+      requestAnimationFrame(frame);
+    })();
+
+    /* =========================
+       INTRO SEQUENCE: spins + scale, then menu fade-in upward, then logo moves left and settles rotating forever
+       ========================= */
     function runIntroSequence() {
       const overlay = document.getElementById('intro-overlay');
       const logo = document.getElementById('logo-red');
@@ -56,7 +125,7 @@
       // ensure src
       if (LOGO_SRC) logoImg.src = LOGO_SRC;
 
-      // prepare vars
+      // animation params
       const spinsTotal = 3;
       const spinDuration = 700;
       const betweenDelay = 140;
@@ -67,11 +136,10 @@
       // helper for single spin
       function doSpin(index) {
         return new Promise(resolve => {
-          const scale = 1 + index * 0.28; // cresce ogni spin
+          const scale = 1 + index * 0.32; // cresce ogni spin
           const prevRot = parseInt(logo.dataset.rot || '0', 10);
           const newRot = prevRot + 360;
           logo.dataset.rot = String(newRot);
-          // use transition for smooth spin+scale
           logo.style.transition = `transform ${spinDuration}ms cubic-bezier(.2,.9,.25,1)`;
           logo.style.transform = `translate(-50%,-50%) rotate(${newRot}deg) scale(${scale})`;
           setTimeout(() => resolve(), spinDuration + 20);
@@ -79,35 +147,41 @@
       }
 
       (async () => {
-        // initial slightly smaller
-        logo.style.transform = 'translate(-50%,-50%) scale(0.9)';
-
-        // do the spins
+        // start slightly smaller and centered
+        logo.style.transform = 'translate(-50%,-50%) scale(0.92)';
+        // do spins
         for (let i = 0; i < spinsTotal; i++) {
           await doSpin(i);
           await new Promise(r => setTimeout(r, betweenDelay));
         }
 
-        // after spins: move logo to top and fix it there, keep it rotating forever
+        // show menu: fade-in and move up
+        verifyCard.classList.remove('hidden');
+        verifyCard.classList.add('visible', 'animate-in');
+
+        // shrink a touch and move the logo up-left to be beside the menu
+        // set transition
         logo.style.transition = 'all 700ms cubic-bezier(.22,.9,.32,1)';
-        logo.style.top = '40px';      // posizione alta
-        logo.style.left = '50%';
-        logo.style.transform = `translate(-50%,-50%) rotate(${logo.dataset.rot || 0}deg) scale(1)`;
-        logo.classList.add('settled'); // adds slow infinite rotation via CSS
+        // top remains 40px, move left by minus offset to go left of center
+        // use calc to position responsively
+        logo.style.left = 'calc(50% - 180px)';
+        // keep translate(-50%,-50%) in transform; reapply rotation and scale a little larger
+        const finalRot = logo.dataset.rot || 0;
+        logo.style.transform = `translate(-50%,-50%) rotate(${finalRot}deg) scale(1.12)`;
+        // add settled rotation class
+        logo.classList.add('settled');
 
-        // reveal the form (centered and slightly raised)
-        setTimeout(() => {
-          overlay.classList.add('overlay-revealed'); // makes overlay transparent but logo stays
-          verifyCard.classList.remove('hidden');
-          verifyCard.classList.add('visible');
-        }, 420);
+        // make overlay transparent but keep logo in front (overlay CSS handles it)
+        setTimeout(() => overlay.classList.add('overlay-revealed'), 420;
 
-        // keep overlay in the DOM (so logo remains interactive/visible above everything)
-        // (no removal)
+        // clean up animate-in class after animation finishes
+        setTimeout(() => verifyCard.classList.remove('animate-in'), 900);
       })();
     }
 
-    // Button logic
+    /* =========================
+       Setup controls (buttons)
+       ========================= */
     function setupControls() {
       const STORAGE_KEY = 'savedPassword';
       const pwdInput = document.getElementById('pwdInput');
