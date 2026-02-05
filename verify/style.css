@@ -1,144 +1,104 @@
+/* Variabili per personalizzare velocemente */
 :root{
-  --bg-color: #060505;
-  --center-black-stop: 28%;
-  --rain-opacity: 0.06;
-  --blob-color-inner: rgba(120, 10, 10, 0.95);
-  --blob-color-mid: rgba(80, 0, 0, 0.85);
-  --blob-color-edge: rgba(10,0,0,0);
+  --bg-black: #000000;
+  --red-1: #3a0000;    /* tonalità più scura */
+  --red-2: #7b0d0d;    /* tonalità media */
+  --red-3: #c53030;    /* punto più brillante */
+  --anim-duration: 12s; /* durata ciclo animazione */
+  --center-size: 28%;   /* quanto è esteso il nero al centro (se usi radial) */
 }
 
-html,body{
-  height:100%;
-  margin:0;
-  font-family: Inter, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background: var(--bg-color);
-  color:#fff;
-}
+/* Reset/minimi */
+*{box-sizing:border-box}
+html,body{height:100%; margin:0}
 
-.stage{
+/* Corpo: posizionamento per pseudo-elementi che fanno lo sfondo */
+body{
+  min-height:100vh;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: #fff;
   position:relative;
-  width:100%;
-  height:100vh;
   overflow:hidden;
-  display:grid;
-  place-items:center;
+  /* un fallback solido nel caso il CSS non venga caricato */
+  background: linear-gradient(180deg, var(--bg-black) 0%, #200000 100%);
 }
 
-/* LAYER 1: pioggia */
-.stage .rain{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  z-index:1;
-}
-.stage .rain::before{
+/* --- Layer principale animato (sfumatura rossa) --- */
+/* usiamo ::before per il gradiente animato e ::after per il centro nero/ombra */
+body::before{
   content:"";
-  position:absolute;
-  inset:-200% -50%;
-  background-image:
-    linear-gradient(120deg, rgba(255,255,255,var(--rain-opacity)) 0 1px, transparent 1px);
-  background-size: 2px 40px;
-  opacity:0.9;
-  transform: translateY(-10%);
-  animation: rain-fall 3s linear infinite;
-  will-change: transform;
-  mix-blend-mode: overlay;
-  filter: blur(0.2px) contrast(0.9);
-}
-@keyframes rain-fall{
-  0% { transform: translateY(-10%) rotate(0.001deg); }
-  100% { transform: translateY(100%) rotate(0.001deg); }
-}
-
-/* LAYER 2: gradiente centrale nero */
-.stage .center{
-  position:absolute;
+  position:fixed;
   inset:0;
-  z-index:2;
+  z-index:-2;
   pointer-events:none;
-  background:
-    radial-gradient(circle at 50% 50%,
-      #000 0%,
-      #000 var(--center-black-stop),
-      rgba(0,0,0,0.0) calc(var(--center-black-stop) + 15%)
-    );
+
+  /* gradiente lineare con più stop, esteso e animato tramite background-position */
+  background: linear-gradient(120deg,
+              var(--red-1) 0%,
+              var(--red-2) 40%,
+              var(--red-3) 60%,
+              var(--red-2) 80%,
+              var(--red-1) 100%);
+  background-size: 300% 300%;
+  filter: saturate(0.95) contrast(0.95);
+  will-change: background-position, transform;
+  animation: gradientShift var(--anim-duration) ease-in-out infinite;
   mix-blend-mode: normal;
-  opacity:0.95;
+  opacity: 0.95;
 }
 
-/* LAYER 3: blob rossi */
-.stage .blobs{
-  position:absolute;
+/* --- Layer sovrapposto: centro nero per "graduazione" verso i bordi --- */
+body::after{
+  content:"";
+  position:fixed;
   inset:0;
-  z-index:3;
+  z-index:-1;
   pointer-events:none;
-}
-.blob{
-  position:absolute;
-  width: 280px;
-  height: 280px;
-  transform: translate(-50%, -50%) scale(0);
-  border-radius: 50%;
-  pointer-events:none;
-  background:
-    radial-gradient(circle,
-      var(--blob-color-inner) 0%,
-      var(--blob-color-mid) 40%,
-      var(--blob-color-edge) 75%
-    );
-  filter: blur(14px) saturate(0.7);
-  opacity:0;
-  mix-blend-mode: screen;
+
+  /* centro nero che sfuma verso i bordi (radial). L'animazione è molto leggera (pulsing) */
+  background: radial-gradient(circle at 50% 48%,
+              var(--bg-black) 0%,
+              var(--bg-black) var(--center-size),
+              rgba(0,0,0,0.0) calc(var(--center-size) + 12%));
+  opacity: 0.95;
+  transform-origin: 50% 50%;
   will-change: transform, opacity;
-  animation-name: blob-expand;
-  animation-iteration-count: infinite;
-  animation-timing-function: cubic-bezier(.22,.9,.35,1);
+  animation: centerPulse calc(var(--anim-duration) * 1.2) ease-in-out infinite;
+  mix-blend-mode: multiply;
 }
 
-@keyframes blob-expand{
-  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-  10%  { opacity: 0.25; }
-  50%  { transform: translate(-50%, -50%) scale(1); opacity: 0.45; }
-  90%  { opacity: 0.08; }
-  100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+/* Animazioni */
+@keyframes gradientShift{
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-/* Card di verifica (sopra tutto) */
-.card{
-  position:relative;
-  z-index:5;
-  background: rgba(10,10,12,0.6);
-  padding: 36px;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.02) inset;
-  border: 1px solid rgba(255,255,255,0.03);
-  min-width:300px;
-  max-width:420px;
+@keyframes centerPulse{
+  0%   { transform: scale(1); opacity: 0.96; }
+  50%  { transform: scale(1.02); opacity: 0.99; }
+  100% { transform: scale(1); opacity: 0.96; }
+}
+
+/* Esempio di contenuto centrato (solo demo) */
+.demo{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   text-align:center;
-  backdrop-filter: blur(6px) saturate(1.1);
+  padding:32px;
+  z-index:1; /* sopra lo sfondo */
 }
-.card h1{ margin:0 0 12px 0; font-size:1.15rem; letter-spacing:0.2px; }
-.card p{ margin:0 0 20px 0; color: #ddd; font-size:0.95rem; line-height:1.4 }
-.btn{
-  display:inline-block;
-  padding:10px 16px;
-  background: linear-gradient(180deg, rgba(255,40,40,0.95), rgba(180,30,30,0.95));
-  color:#fff;
-  border-radius:8px;
-  text-decoration:none;
-  font-weight:600;
-  box-shadow: 0 6px 18px rgba(160,20,20,0.25);
-  border: 1px solid rgba(255,255,255,0.06);
-}
+.demo h1{ margin:0 0 8px; font-size:1.25rem; letter-spacing:.2px }
+.demo p{ margin:0; opacity:0.9 }
 
-/* prefer-reduced-motion */
-@media (prefers-reduced-motion: reduce) {
-  .stage .rain::before { animation: none; }
-  .blob { animation: none; opacity: 0.2; transform: translate(-50%,-50%) scale(1); }
-}
-
-/* mobile tweaks */
-@media (max-width:520px){
-  .blob{ width:180px; height:180px; filter: blur(10px); }
-  .card{ margin: 12px; padding: 22px }
+/* Supporto 'prefers-reduced-motion' — disabilita animazioni per utenti che le vogliono ridotte */
+@media (prefers-reduced-motion: reduce){
+  body::before, body::after {
+    animation: none;
+    transition: none;
+  }
+  body::before { background-size: 200% 200%; }
+  body::after  { transform: none; }
 }
