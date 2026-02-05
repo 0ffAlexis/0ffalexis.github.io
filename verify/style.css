@@ -1,0 +1,350 @@
+/* =========================
+   VARIABILI E TIMING (modifica qui per cambiare velocità/delay)
+   ========================= */
+:root{
+  /* colori */
+  --red-center-1: rgba(178,31,31,1);
+  --red-center-2: rgba(120,10,10,0.9);
+  --black-edge: #000;
+
+  /* dimensioni */
+  --center-size: 36%;    /* dimensione radiale attorno al logo */
+  --center-gap: 16%;
+
+  /* logo */
+  --logo-size: 900px;
+
+  /* timing */
+  --bg-delay: 1s;        /* delay prima che il rosso inizi a comparire */
+  --bg-enter: 1s;        /* durata dell'entrata del rosso */
+  --bg-pulse: 12s;       /* durata ciclo del pulse del background */
+  --logo-delay: calc(var(--bg-delay) + var(--bg-enter) * 0.6); /* logo inizia poco dopo l'avvio del rosso */
+  --logo-in: 0.9s;       /* durata comparsa logo */
+  --logo-rotate: 18s;    /* durata rotazione continuativa */
+  --rain-speed: 1.8s;
+  --rain-opacity: 0.055;
+
+  --ui-delay: 6s;
+  --logo-move: 1.2s;
+
+  --menu-width: 420px;
+  --menu-bg-dark: rgba(70, 10, 10, 0.92);
+  --menu-bg-light: rgba(150, 40, 40, 0.95);
+  --menu-border: rgba(190, 60, 60, 0.9);
+  --wine-glow: rgba(120, 20, 20, 0.8);
+}
+
+/* reset minimale */
+*{ box-sizing: border-box; margin:0; padding:0; }
+html,body{ height:100%; width:100%; }
+
+/* =========================
+   BODY: initialmente tutto nero (fallback + bordo)
+   ========================= */
+body{
+  margin:0;
+  min-height:100vh;
+  width:100vw;
+  overflow:hidden;
+  background: var(--black-edge); /* all'inizio è tutto nero */
+  position:relative;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* =========================
+   RADIAL RED (centro) — body::before
+   - inizialmente invisibile: compare con delay, poi entra e poi pulsa
+   ========================= */
+body::before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+
+  /* radiale rosso centrale che gradua verso la trasparenza (mostra il nero di body) */
+  background:
+    radial-gradient(
+      circle at center,
+      var(--red-center-1) 0%,
+      var(--red-center-2) calc(var(--center-size) * 0.6),
+      rgba(60,10,10,0.55) var(--center-size),
+      rgba(0,0,0,0) calc(var(--center-size) + var(--center-gap))
+    );
+  background-size: 140% 140%;
+
+  /* start hidden: l'animazione 'bgEnter' aumenterà opacity/scale */
+  opacity: 0;
+  transform: scale(0.98);
+  will-change: transform, opacity, background-position;
+
+  /* due animazioni: 1) entrata con delay; 2) pulse che parte dopo l'entrata */
+  animation:
+    bgEnter var(--bg-enter) ease forwards var(--bg-delay),
+    bgPulse var(--bg-pulse) ease-in-out infinite calc(var(--bg-delay) + var(--bg-enter));
+  mix-blend-mode: normal;
+  filter: saturate(1) contrast(0.98);
+}
+
+/* keyframes per la comparsa elegante del rosso */
+@keyframes bgEnter {
+  0%   { opacity: 0; transform: scale(0.98); filter: brightness(0.6); }
+  60%  { opacity: 1; transform: scale(1.015); filter: brightness(1.05); }
+  100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+}
+
+/* pulsing sottile dopo l'entrata */
+@keyframes bgPulse {
+  0%   { transform: scale(1); filter: brightness(0.96) saturate(0.98); }
+  50%  { transform: scale(1.01); filter: brightness(1.03) saturate(1.02); }
+  100% { transform: scale(1); filter: brightness(0.96) saturate(0.98); }
+}
+
+/* =========================
+   PIOGGIA (sopra il radiale, sotto il logo)
+   ========================= */
+.bg-rain{
+  position: fixed;
+  inset:0;
+  z-index: 1; /* sopra body::before (z=0) */
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  filter: blur(0.25px) contrast(0.92);
+  opacity: 0.98;
+
+  background-image:
+    repeating-linear-gradient(
+      120deg,
+      rgba(255,255,255,var(--rain-opacity)) 0 1px,
+      transparent 1px 28px
+    );
+  background-size: 3px 32px;
+  background-position: 0 -160px;
+  will-change: background-position;
+  animation: rainFall var(--rain-speed) linear infinite;
+}
+
+@keyframes rainFall {
+  0%   { background-position: 0 -240px; opacity:0.94; }
+  50%  { opacity:1; }
+  100% { background-position: 0 240px; opacity:0.94; }
+}
+
+/* =========================
+   RIFT LINE — diagonale vera (bottom-left → top-right)
+   ========================= */
+
+.rift{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.rift-line{
+  position: absolute;
+  left: -60%;
+  bottom: -60%;
+  width: 220%;
+  height: 26px;
+
+  transform: rotate(-45deg);
+
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0,0,0,0.25) 18%,
+    rgba(0,0,0,0.6) 40%,
+    rgba(0,0,0,0.95) 50%,
+    rgba(0,0,0,0.6) 60%,
+    rgba(0,0,0,0.25) 82%,
+    transparent 100%
+  );
+
+  filter: blur(7px);
+  opacity: 0.9;
+
+  box-shadow:
+    0 0 50px rgba(0,0,0,0.9),
+    0 0 100px rgba(0,0,0,0.6);
+
+  will-change: transform, left, bottom, opacity;
+  animation: riftTraverse 12s ease-in-out infinite;
+}
+
+
+/* movimento lento, quasi impercettibile */
+@keyframes riftTraverse {
+  0% {
+    transform: translate(-40%, 40%) rotate(-45deg);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: translate(0%, 0%) rotate(-45deg);
+    opacity: 0.95;
+  }
+
+  100% {
+    transform: translate(40%, -40%) rotate(-45deg);
+    opacity: 0.6;
+  }
+}
+
+/* =========================
+   LOGO: comparsa elegante sincronizzata + rotazione dopo la comparsa
+   ========================= */
+.logo-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 2; /* sopra la pioggia e la rift */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+
+.rotating-logo {
+  width: var(--logo-size);
+  max-width: 90vw;
+  height:auto;
+  opacity: 0;
+  transform: translateY(12px) scale(0.92);
+  filter: drop-shadow(0 0 60px rgba(178, 31, 31, 0.32));
+  will-change: transform, opacity;
+  /* due animazioni: 1) ingresso, 2) rotazione (parte dopo l'ingresso) */
+  animation:
+  logoIn var(--logo-in) cubic-bezier(.2,.9,.25,1) forwards var(--logo-delay),
+  logoRotate var(--logo-rotate) linear infinite calc(var(--logo-delay) + var(--logo-in)),
+  logoDock var(--logo-move) ease-in-out forwards var(--ui-delay);
+}
+
+/* ingresso: piccola salita + fade + overshoot elegante */
+@keyframes logoIn {
+  0%   { opacity: 0; transform: translateY(18px) scale(0.92); filter: blur(1px); }
+  60%  { opacity: 1; transform: translateY(-6px) scale(1.02); filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+/* rotazione continua che parte dopo l'entrata (delay impostato nella proprietà animation) */
+@keyframes logoRotate {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes logoDock {
+  to {
+    transform:
+      translate(-260px, 0)
+      scale(0.72)
+      rotate(360deg);
+  }
+}
+
+/* prefer-reduced-motion: disabilita tutto per utenti sensibili */
+@media (prefers-reduced-motion: reduce) {
+  body::before, .bg-rain, .rotating-logo, .rift-line.main { animation: none !important; transition: none !important; }
+  .rotating-logo { transform: none; opacity:1; }
+}
+
+/* responsive: evita overflow su schermi stretti */
+@media (max-width:900px) {
+  :root { --logo-size: 540px; --center-size: 44%; }
+  .rift-line.main { height:4px; }
+}
+
+.side-menu{
+  position: fixed;
+  top: 50%;
+  right: -480px;
+  transform: translateY(-50%);
+  width: var(--menu-width);
+  padding: 28px;
+  z-index: 3;
+
+  background:
+    linear-gradient(
+      160deg,
+      var(--menu-bg-light),
+      var(--menu-bg-dark)
+    );
+
+  border-radius: 18px;
+  box-shadow:
+    0 0 40px var(--wine-glow),
+    inset 0 0 30px rgba(0,0,0,0.4);
+
+  animation: menuEnter 1.4s ease forwards var(--ui-delay);
+}
+
+@keyframes menuEnter{
+  to{
+    right: 40px;
+  }
+}
+
+.side-menu::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius:inherit;
+  background:
+    linear-gradient(
+      120deg,
+      transparent,
+      var(--menu-border),
+      transparent
+    );
+  filter: blur(6px);
+  opacity: 0.8;
+  animation: borderPulse 6s ease-in-out infinite;
+}
+
+@keyframes borderPulse{
+  0%,100%{ opacity:0.4 }
+  50%{ opacity:1 }
+}
+
+.side-menu::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius:inherit;
+  background:
+    linear-gradient(
+      120deg,
+      transparent,
+      var(--menu-border),
+      transparent
+    );
+  filter: blur(6px);
+  opacity: 0.8;
+  animation: borderPulse 6s ease-in-out infinite;
+}
+
+@keyframes borderPulse{
+  0%,100%{ opacity:0.4 }
+  50%{ opacity:1 }
+}
+
+.menu-actions{
+  display:flex;
+  gap:12px;
+}
+
+.menu-actions button{
+  flex:1;
+  background:rgba(120,20,20,0.6);
+  border:1px solid rgba(255,120,120,0.4);
+  color:#ffeaea;
+  padding:10px;
+  border-radius:8px;
+  cursor:text;
+  transition: all .25s ease;
+}
+
+.menu-actions button:hover{
+  box-shadow:0 0 16px var(--wine-glow);
+}

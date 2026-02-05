@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Verifica — animazione sincronizzata</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- layer pioggia -->
+  <div class="bg-rain" aria-hidden="true"></div>
+
+  <!-- rift-line / linea rossa (rimane sempre visibile) -->
+  <div class="rift" aria-hidden="true">
+    <div class="rift-line main"></div>
+  </div>
+
+  <!-- logo centrale -->
+  <div class="logo-wrapper" aria-hidden="false">
+    <img src="Assets/logo_red.jpg" alt="Logo" class="rotating-logo">
+  </div>
+
+  <div class="side-menu" aria-hidden="false">
+  <h2>Verificati</h2>
+
+  <textarea placeholder="Scrivi qui..."></textarea>
+
+   <div class="menu-actions">
+    <button contenteditable="true">Salva</button>
+    <button contenteditable="true">Carica</button>
+    <button contenteditable="true">Cancella</button>
+   </div>
+  </div>
+
+</body>
+</html>
