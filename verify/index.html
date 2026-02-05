@@ -3,70 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Pagina di verifica — sfondo animato</title>
+  <title>Sfondo animato — rosso & nero</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="stage" aria-hidden="false">
-    <div class="rain" aria-hidden="true"></div>
-    <div class="center" aria-hidden="true"></div>
-    <div class="blobs" aria-hidden="true"></div>
-
-    <div class="card" role="main" aria-label="Verifica">
-      <h1>Verifica il tuo account</h1>
-      <p>Per completare l'accesso, premi il pulsante qui sotto per ricevere il codice di verifica.</p>
-      <a class="btn" href="#" role="button">Richiedi codice</a>
-    </div>
-  </div>
-
-  <script>
-  /*
-    Script minimo per generare i "blob" rossi in posizioni e durate casuali.
-    Manteniamo JS in HTML così restano solo 2 file (HTML + CSS).
-  */
-  (function createRandomBlobs(){
-    const container = document.querySelector('.stage .blobs');
-    if(!container) return;
-    const BLOBS = 12;
-
-    function randomEdgePosition(){
-      const side = ['top','right','bottom','left'][Math.floor(Math.random()*4)];
-      let x,y;
-      switch(side){
-        case 'top':
-          x = Math.random()*100; y = -10 + Math.random()*8; break;
-        case 'bottom':
-          x = Math.random()*100; y = 110 - Math.random()*8; break;
-        case 'left':
-          x = -10 + Math.random()*8; y = Math.random()*100; break;
-        default:
-          x = 110 - Math.random()*8; y = Math.random()*100; break;
-      }
-      return {x,y};
-    }
-
-    for(let i=0;i<BLOBS;i++){
-      const b = document.createElement('div');
-      b.className = 'blob';
-      const pos = randomEdgePosition();
-      b.style.left = pos.x + '%';
-      b.style.top  = pos.y + '%';
-
-      const size = 160 + Math.floor(Math.random()*260);
-      b.style.width = size + 'px';
-      b.style.height= size + 'px';
-
-      const duration = (6 + Math.random()*8).toFixed(2);
-      const delay = (Math.random()*-(duration)).toFixed(2);
-      b.style.animationDuration = duration + 's';
-      b.style.animationDelay = delay + 's';
-
-      b.style.opacity = (0.2 + Math.random()*0.6).toFixed(2);
-      b.style.rotate = (Math.random()*40 - 20) + 'deg';
-
-      container.appendChild(b);
-    }
-  })();
-  </script>
+  <!-- Contenuto di esempio: rimuovi o sostituisci con la tua pagina di verifica -->
+  <main class="demo">
+    <h1>Verifica il tuo account</h1>
+    <p>Questo è solo un placeholder — lo sfondo è separato nel file CSS.</p>
+  </main>
 </body>
 </html>
