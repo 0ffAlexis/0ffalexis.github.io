@@ -32,6 +32,13 @@
   --menu-bg-light: rgba(150, 40, 40, 0.95);
   --menu-border: rgba(190, 60, 60, 0.9);
   --wine-glow: rgba(120, 20, 20, 0.8);
+
+  /* posizione menu: regola qui per spostarlo più in basso / più a sinistra.
+     --menu-top: sposta il menu verticalmente (es. 56% => un po' più in basso).
+     --menu-right: distanza finale dal bordo destro; clamp garantisce che
+     non superi la metà dello schermo (non oltrepassa il centro). */
+  --menu-top: 56%;
+  --menu-right: clamp(40px, 6vw, calc(50vw - var(--menu-width)));
 }
 
 /* reset minimale */
@@ -255,9 +262,12 @@ body::before{
   .rift-line.main { height:4px; }
 }
 
+/* =========================
+   SIDE MENU (posizionamento aggiornato)
+   ========================= */
 .side-menu{
   position: fixed;
-  top: 50%;
+  top: var(--menu-top);
   right: -480px;
   transform: translateY(-50%);
   width: var(--menu-width);
@@ -281,32 +291,11 @@ body::before{
 
 @keyframes menuEnter{
   to{
-    right: 40px;
+    right: var(--menu-right);
   }
 }
 
-.side-menu::before{
-  content:"";
-  position:absolute;
-  inset:-2px;
-  border-radius:inherit;
-  background:
-    linear-gradient(
-      120deg,
-      transparent,
-      var(--menu-border),
-      transparent
-    );
-  filter: blur(6px);
-  opacity: 0.8;
-  animation: borderPulse 6s ease-in-out infinite;
-}
-
-@keyframes borderPulse{
-  0%,100%{ opacity:0.4 }
-  50%{ opacity:1 }
-}
-
+/* effetto bordo glow del menu */
 .side-menu::before{
   content:"";
   position:absolute;
@@ -347,4 +336,12 @@ body::before{
 
 .menu-actions button:hover{
   box-shadow:0 0 16px var(--wine-glow);
+}
+
+/* responsive tweak: su schermi piccoli mantieni distanza minima dal bordo */
+@media (max-width:900px) {
+  :root { --logo-size: 540px; --center-size: 44%; }
+  .rift-line.main { height:4px; }
+  /* su mobile potresti voler tenere il menu più a bordo */
+  :root { --menu-top: 58%; --menu-right: 18px; }
 }
