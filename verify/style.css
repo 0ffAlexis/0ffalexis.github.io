@@ -2,64 +2,73 @@
    VARIABILI E TIMING (modifica qui per cambiare velocità/delay)
    ========================= */
 :root{
-  /* colori */
+  /* colori principali e di supporto */
   --red-center-1: rgba(178,31,31,1);
   --red-center-2: rgba(120,10,10,0.9);
   --black-edge: #000;
 
-  /* dimensioni */
+  /* dimensioni generali del layout */
   --center-size: 36%;    /* dimensione radiale attorno al logo */
   --center-gap: 16%;
 
   /* logo */
   --logo-size: 900px;
 
-  /* timing */
+  /* timing: animazioni principali */
   --bg-delay: 1s;        /* delay prima che il rosso inizi a comparire */
   --bg-enter: 1s;        /* durata dell'entrata del rosso */
   --bg-pulse: 12s;       /* durata ciclo del pulse del background */
-  --logo-delay: calc(var(--bg-delay) + var(--bg-enter) * 0.6);
-  --logo-in: 0.9s;
-  --logo-rotate: 18s;
+  --logo-delay: calc(var(--bg-delay) + var(--bg-enter) * 0.6); /* logo inizia poco dopo l'avvio del rosso */
+  --logo-in: 0.9s;       /* durata comparsa logo */
+  --logo-rotate: 18s;    /* durata rotazione continuativa */
   --rain-speed: 1.8s;
   --rain-opacity: 0.055;
 
   --ui-delay: 6s;
   --logo-move: 1.2s;
 
+  /* menu / UI panel (personalizzabili) */
   --menu-width: 420px;
   --menu-bg-dark: rgba(70, 10, 10, 0.92);
   --menu-bg-light: rgba(150, 40, 40, 0.95);
   --menu-border: rgba(190, 60, 60, 0.9);
   --wine-glow: rgba(120, 20, 20, 0.8);
 
-  /* POSIZIONE MENU — spostamento LEFT aumentato del 50% rispetto a prima.
-     Uso clamp(min, preferred, max) — ho scelto un 'preferred' più grande (12vw)
-     così su schermi normali il menu si allontana davvero dal bordo. */
+  /*
+    POSIZIONAMENTO MENU — strategia robusta:
+    - vogliamo che il menu si allontani dal bordo su schermi larghi ma resti vicino in mobile
+    - usiamo `max()` per assicurarci che il valore scelto sia sempre il più grande tra:
+       1) una distanza minima (40px)
+       2) una preferenza relativa (es. 14vw)
+       3) un calcolo basato sulla metà del viewport che porta il menu più verso il centro
+    - così evitiamo che `clamp()` venga 'schiacciato' dal max troppo restrittivo
+  */
   --menu-top: 58%;
-  --menu-right: clamp(24px, 12vw, calc(50vw - (2.25 * var(--menu-width)) - 40px));
+  --menu-right: max(40px, 14vw, calc(50vw - var(--menu-width) - 120px));
 
-  /* backdrop dietro il menu (dimensione/offset/colore).
-     offset aumentato del 50% rispetto a prima (34px -> 51px).
-     trasformazione proporzionalmente maggiore per evidenziare lo spostamento. */
-  --menu-backdrop-offset: 51px;
-  --menu-backdrop-pad: 12px;
-  --menu-backdrop-color: rgba(10,8,10,0.72);
+  /* backdrop dietro il menu (dimensione/offset/colore) */
+  --menu-backdrop-offset: 72px; /* quanto il backdrop sporge verso sinistra */
+  --menu-backdrop-pad: 12px;    /* padding extra attorno al box per il backdrop */
+  --menu-backdrop-color: rgba(10,8,10,0.75); /* colore scuro del pannello sotto */
 }
 
-/* reset minimale */
+/* =========================
+   RESET MINIMALE
+   - mantenere box-sizing, margin, padding coerenti
+   ========================= */
 *{ box-sizing: border-box; margin:0; padding:0; }
 html,body{ height:100%; width:100%; }
 
 /* =========================
    BODY: initialmente tutto nero (fallback + bordo)
+   - impostazioni generali della pagina
    ========================= */
 body{
   margin:0;
   min-height:100vh;
   width:100vw;
-  overflow:hidden;
-  background: var(--black-edge);
+  overflow:hidden;                 /* evita scroll indesiderati quando il menu esce fuori */
+  background: var(--black-edge);   /* all'inizio è tutto nero */
   position:relative;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
@@ -67,6 +76,7 @@ body{
 
 /* =========================
    RADIAL RED (centro) — body::before
+   - inizialmente invisibile: compare con delay, poi entra e poi pulsa
    ========================= */
 body::before{
   content: "";
@@ -74,6 +84,8 @@ body::before{
   inset: 0;
   z-index: 0;
   pointer-events: none;
+
+  /* radiale rosso centrale che gradua verso la trasparenza (mostra il nero di body) */
   background:
     radial-gradient(
       circle at center,
@@ -83,9 +95,13 @@ body::before{
       rgba(0,0,0,0) calc(var(--center-size) + var(--center-gap))
     );
   background-size: 140% 140%;
+
+  /* start hidden: l'animazione 'bgEnter' aumenterà opacity/scale */
   opacity: 0;
   transform: scale(0.98);
   will-change: transform, opacity, background-position;
+
+  /* due animazioni: 1) entrata con delay; 2) pulse che parte dopo l'entrata */
   animation:
     bgEnter var(--bg-enter) ease forwards var(--bg-delay),
     bgPulse var(--bg-pulse) ease-in-out infinite calc(var(--bg-delay) + var(--bg-enter));
@@ -93,12 +109,14 @@ body::before{
   filter: saturate(1) contrast(0.98);
 }
 
+/* keyframes per la comparsa elegante del rosso */
 @keyframes bgEnter {
   0%   { opacity: 0; transform: scale(0.98); filter: brightness(0.6); }
   60%  { opacity: 1; transform: scale(1.015); filter: brightness(1.05); }
   100% { opacity: 1; transform: scale(1); filter: brightness(1); }
 }
 
+/* pulsing sottile dopo l'entrata */
 @keyframes bgPulse {
   0%   { transform: scale(1); filter: brightness(0.96) saturate(0.98); }
   50%  { transform: scale(1.01); filter: brightness(1.03) saturate(1.02); }
@@ -106,16 +124,18 @@ body::before{
 }
 
 /* =========================
-   PIOGGIA
+   PIOGGIA (sopra il radiale, sotto il logo)
+   - effetto di linee sottili ricorrenti
    ========================= */
 .bg-rain{
   position: fixed;
   inset:0;
-  z-index: 1;
+  z-index: 1; /* sopra body::before (z=0) */
   pointer-events: none;
   mix-blend-mode: overlay;
   filter: blur(0.25px) contrast(0.92);
   opacity: 0.98;
+
   background-image:
     repeating-linear-gradient(
       120deg,
@@ -135,9 +155,9 @@ body::before{
 }
 
 /* =========================
-   RIFT LINE
+   RIFT LINE — diagonale vera (bottom-left → top-right)
+   - linea diagonale scura con blur per profondità
    ========================= */
-
 .rift{
   position: fixed;
   inset: 0;
@@ -152,7 +172,9 @@ body::before{
   bottom: -60%;
   width: 220%;
   height: 26px;
+
   transform: rotate(-45deg);
+
   background: linear-gradient(
     90deg,
     transparent 0%,
@@ -163,28 +185,44 @@ body::before{
     rgba(0,0,0,0.25) 82%,
     transparent 100%
   );
+
   filter: blur(7px);
   opacity: 0.9;
+
   box-shadow:
     0 0 50px rgba(0,0,0,0.9),
     0 0 100px rgba(0,0,0,0.6);
+
   will-change: transform, left, bottom, opacity;
   animation: riftTraverse 12s ease-in-out infinite;
 }
 
+/* movimento lento, quasi impercettibile */
 @keyframes riftTraverse {
-  0% { transform: translate(-40%, 40%) rotate(-45deg); opacity: 0.6; }
-  50% { transform: translate(0%, 0%) rotate(-45deg); opacity: 0.95; }
-  100% { transform: translate(40%, -40%) rotate(-45deg); opacity: 0.6; }
+  0% {
+    transform: translate(-40%, 40%) rotate(-45deg);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: translate(0%, 0%) rotate(-45deg);
+    opacity: 0.95;
+  }
+
+  100% {
+    transform: translate(40%, -40%) rotate(-45deg);
+    opacity: 0.6;
+  }
 }
 
 /* =========================
-   LOGO
+   LOGO: comparsa elegante sincronizzata + rotazione dopo la comparsa
+   - wrapper centrato e logo animato
    ========================= */
 .logo-wrapper {
   position: fixed;
   inset: 0;
-  z-index: 2;
+  z-index: 2; /* sopra la pioggia e la rift */
   display:flex;
   align-items:center;
   justify-content:center;
@@ -199,23 +237,27 @@ body::before{
   transform: translateY(12px) scale(0.92);
   filter: drop-shadow(0 0 60px rgba(178, 31, 31, 0.32));
   will-change: transform, opacity;
+  /* due animazioni: 1) ingresso, 2) rotazione (parte dopo l'ingresso) */
   animation:
     logoIn var(--logo-in) cubic-bezier(.2,.9,.25,1) forwards var(--logo-delay),
     logoRotate var(--logo-rotate) linear infinite calc(var(--logo-delay) + var(--logo-in)),
     logoDock var(--logo-move) ease-in-out forwards var(--ui-delay);
 }
 
+/* ingresso: piccola salita + fade + overshoot elegante */
 @keyframes logoIn {
   0%   { opacity: 0; transform: translateY(18px) scale(0.92); filter: blur(1px); }
   60%  { opacity: 1; transform: translateY(-6px) scale(1.02); filter: blur(0); }
   100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
+/* rotazione continua che parte dopo l'entrata (delay impostato nella proprietà animation) */
 @keyframes logoRotate {
   0%   { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
+/* docking finale del logo (si sposta a sinistra e si riduce) */
 @keyframes logoDock {
   to {
     transform:
@@ -225,7 +267,7 @@ body::before{
   }
 }
 
-/* prefer-reduced-motion */
+/* prefer-reduced-motion: disabilita tutte le animazioni per utenti sensibili */
 @media (prefers-reduced-motion: reduce) {
   body::before, .bg-rain, .rotating-logo, .rift-line.main { animation: none !important; transition: none !important; }
   .rotating-logo { transform: none; opacity:1; }
@@ -239,36 +281,45 @@ body::before{
 
 /* =========================
    SIDE MENU (posizionamento aggiornato + backdrop scuro)
+   - pannello con glow, bordi arrotondati e backdrop pseudo-element
    ========================= */
 .side-menu{
   position: fixed;
   top: var(--menu-top);
-  right: -480px;                /* start fuori schermo */
+  right: -480px;                /* start fuori schermo: animazione lo porta a var(--menu-right) */
   transform: translateY(-50%);
   width: var(--menu-width);
   padding: 28px;
-  z-index: 3;
+  z-index: 3;                   /* resta sopra il backdrop (che è pseudo-element con z-index:-1 dentro lo stacking context) */
+
+  /* sfondo e stile del pannello stesso */
   background:
     linear-gradient(
       160deg,
       var(--menu-bg-light),
       var(--menu-bg-dark)
     );
+
   border-radius: 18px;
   box-shadow:
     0 0 40px var(--wine-glow),
     inset 0 0 30px rgba(0,0,0,0.4);
+
+  /* animazione di entrata: parte fuori e arriva a var(--menu-right) */
   animation: menuEnter 1.4s ease forwards var(--ui-delay);
+
+  /* assicuriamo che il pannello crei il proprio stacking context per gli pseudo-elementi */
+  position: fixed;
 }
 
-/* animazione: ora arriva a var(--menu-right) */
+/* animazione: ora arriva a var(--menu-right) invece di 40px fisso */
 @keyframes menuEnter{
   to{
     right: var(--menu-right);
   }
 }
 
-/* effetto bordo glow del menu */
+/* effetto bordo glow del menu (pseudo-elemento ::before) */
 .side-menu::before{
   content:"";
   position:absolute;
@@ -286,35 +337,42 @@ body::before{
   animation: borderPulse 6s ease-in-out infinite;
 }
 
-/* backdrop scuro sotto il menu, più largo e spostato a sinistra */
+/* NUOVO: backdrop scuro sotto il menu, leggermente più largo e spostato a sinistra.
+   Questo pannello è creato con ::after così non serve HTML extra. */
 .side-menu::after{
   content: "";
   position: absolute;
-  z-index: -1;
+  z-index: -1; /* dietro il menu ma dentro lo stacking context del menu (quindi sopra gli sfondi sottostanti) */
   top: calc(-1 * var(--menu-backdrop-pad));
-  right: calc(var(--menu-backdrop-offset) * -1);
+  right: calc(var(--menu-backdrop-offset) * -1); /* sposto il backdrop verso sinistra rispetto al bordo destro del menu */
   width: calc(100% + var(--menu-backdrop-pad) * 2 + var(--menu-backdrop-offset));
   height: calc(100% + var(--menu-backdrop-pad) * 2);
   border-radius: calc(18px + 6px);
   background: var(--menu-backdrop-color);
   box-shadow:
-    0 10px 30px rgba(0,0,0,0.6),
-    0 2px 8px rgba(0,0,0,0.45) inset;
-  transform: translateX(-36px); /* maggiore spostamento a sinistra */
+    0 18px 50px rgba(0,0,0,0.65),
+    0 3px 12px rgba(0,0,0,0.45) inset;
+  /* spostamento proporzionale usando la variabile: risultato coerente su diversi schermi */
+  transform: translateX(calc(-1 * var(--menu-backdrop-offset) * 0.5));
   transition: transform .38s ease;
   pointer-events: none;
 }
 
-/* interazione visuale: quando il menu è completamente docked (dopo animazione) fai scorrere leggermente il backdrop */
+/* piccola interazione visuale: quando il menu è completamente docked (se aggiungi la classe .opened) fai scorrere leggermente il backdrop */
 .side-menu.opened::after{
-  transform: translateX(-20px);
+  transform: translateX(calc(-1 * var(--menu-backdrop-offset) * 0.3));
 }
 
+/* animazione bordo glow (ripetuta per chiarezza) */
 @keyframes borderPulse{
   0%,100%{ opacity:0.4 }
   50%{ opacity:1 }
 }
 
+/* =========================
+   CONTENUTO E BOTTONI INTERNI DEL MENU
+   - layout semplice a colonne, bottoni con hover
+   ========================= */
 .menu-actions{
   display:flex;
   gap:12px;
@@ -335,11 +393,31 @@ body::before{
   box-shadow:0 0 16px var(--wine-glow);
 }
 
-/* responsive tweak: su schermi piccoli mantieni distanza minima dal bordo */
+/* =========================
+   RESPONSIVE TWEAKS
+   - su schermi piccoli mantieni distanza minima dal bordo per evitare overflow
+   - semplifica backdrop per mobile
+   ========================= */
 @media (max-width:900px) {
   :root { --logo-size: 540px; --center-size: 44%; }
   .rift-line.main { height:4px; }
-  /* mobile: contenere lo spostamento per non creare overflow */
+
+  /* su mobile vogliamo essere conservativi:
+     - menu più in basso
+     - menu vicino al bordo (18px)
+     - backdrop meno pronunciato per non creare overflow */
   :root { --menu-top: 60%; --menu-right: 18px; --menu-backdrop-offset: 10px; --menu-backdrop-pad: 8px; }
   .side-menu::after{ transform: translateX(-6px); }
 }
+
+/* =========================
+   FINE DEL FOGLIO CSS
+   =========================
+   Note per debug / testing:
+   - Se, dopo aver incollato questo file, il menu non si allontana abbastanza:
+     1) fai un hard refresh della pagina (Ctrl/Cmd + Shift + R)
+     2) verifica la larghezza del viewport (F12 -> console -> window.innerWidth)
+     3) se vuoi forzarne lo spostamento ulteriormente, posso cambiare
+        --menu-right a `calc(12vw + 160px)` o aumentare il terzo termine del `max()`.
+   - Ho lasciato molte spiegazioni inline: senti libero di ridurle quando sei soddisfatto.
+*/
