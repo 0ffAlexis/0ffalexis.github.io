@@ -34,15 +34,14 @@
   --wine-glow: rgba(120, 20, 20, 0.8);
 
   /* posizione menu: regola qui per spostarlo più in basso / più a sinistra.
-     --menu-top: sposta il menu verticalmente.
-     --menu-right: distanza finale dal bordo destro; clamp garantisce che
-     non superi la metà dello schermo (non oltrepassa il centro).
-     Ho reso il menu più a sinistra rispetto alla versione precedente. */
+     Ho aumentato lo spostamento verso sinistra del 50% (circa mezza larghezza del menu),
+     usando (1.5 * var(--menu-width)) nel calcolo della posizione massima. */
   --menu-top: 58%;
-  --menu-right: clamp(18px, 8vw, calc(50vw - var(--menu-width) - 40px));
+  --menu-right: clamp(18px, 8vw, calc(50vw - (1.5 * var(--menu-width)) - 40px));
 
-  /* backdrop dietro il menu (dimensione/offset/colore) */
-  --menu-backdrop-offset: 22px;    /* quanto il backdrop sporge a sinistra rispetto al menu */
+  /* backdrop dietro il menu (dimensione/offset/colore).
+     Ho aumentato l'offset del backdrop di ~50% rispetto al valore precedente. */
+  --menu-backdrop-offset: 34px;    /* quanto il backdrop sporge a sinistra rispetto al menu */
   --menu-backdrop-pad: 12px;       /* padding extra intorno al menu per il backdrop */
   --menu-backdrop-color: rgba(10,8,10,0.72); /* scuro sotto il menu */
 }
@@ -290,9 +289,6 @@ body::before{
     0 0 40px var(--wine-glow),
     inset 0 0 30px rgba(0,0,0,0.4);
   animation: menuEnter 1.4s ease forwards var(--ui-delay);
-
-  /* crea un contesto per i pseudo-elementi (utile per il ::after backdrop) */
-  position: fixed;
 }
 
 /* animazione: ora arriva a var(--menu-right) invece di 40px fisso */
@@ -320,7 +316,7 @@ body::before{
   animation: borderPulse 6s ease-in-out infinite;
 }
 
-/* NUOVO: backdrop scuro sotto il menu, leggermente più largo e spostato a sinistra */
+/* backdrop scuro sotto il menu, leggermente più largo e spostato a sinistra */
 .side-menu::after{
   content: "";
   position: absolute;
@@ -334,14 +330,14 @@ body::before{
   box-shadow:
     0 10px 30px rgba(0,0,0,0.6),
     0 2px 8px rgba(0,0,0,0.45) inset;
-  transform: translateX(-12px); /* ulteriore spostamento a sinistra per maggiore profondità */
+  transform: translateX(-24px); /* maggiore spostamento a sinistra per effetto più accentuato */
   transition: transform .38s ease;
   pointer-events: none;
 }
 
 /* piccola interazione visuale: quando il menu è completamente docked (dopo animazione) fai scorrere leggermente il backdrop */
 .side-menu.opened::after{
-  transform: translateX(-8px);
+  transform: translateX(-12px);
 }
 
 /* animazione bordo glow */
