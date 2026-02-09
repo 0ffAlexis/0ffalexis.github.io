@@ -29,27 +29,31 @@
 
   /* menu / UI panel (personalizzabili) */
   --menu-width: 420px;
-  --menu-bg-dark: rgba(70, 10, 10, 0.92);
-  --menu-bg-light: rgba(150, 40, 40, 0.95);
+
+  /* NOTE: --menu-bg-light è stato convertito in grigio chiaro (opaco).
+     --menu-bg-dark rimane un rosso scuro (puoi cambiarlo se vuoi menu completamente grigio). */
+  --menu-bg-dark: rgba(70, 10, 10, 1);        /* rosso scuro, opaco */
+  --menu-bg-light: rgba(220,220,220,1);       /* grigio chiaro opaco (prima era light red) */
+
   --menu-border: rgba(190, 60, 60, 0.9);
   --wine-glow: rgba(120, 20, 20, 0.8);
 
   /*
     POSIZIONAMENTO MENU — strategia robusta:
     - vogliamo che il menu si allontani dal bordo su schermi larghi ma resti vicino in mobile
-    - usiamo `max()` per assicurarci che il valore scelto sia sempre il più grande tra:
+    - usiamo max() per assicurarci che il valore scelto sia sempre il più grande tra:
        1) una distanza minima (40px)
        2) una preferenza relativa (es. 14vw)
        3) un calcolo basato sulla metà del viewport che porta il menu più verso il centro
-    - così evitiamo che `clamp()` venga 'schiacciato' dal max troppo restrittivo
   */
   --menu-top: 58%;
   --menu-right: max(40px, 14vw, calc(50vw - var(--menu-width) - 120px));
 
-  /* backdrop dietro il menu (dimensione/offset/colore) */
+  /* backdrop dietro il menu (dimensione/offset/colore)
+     backdrop OPACO per bloccare visivamente la pulsazione del body::before sotto il menu */
   --menu-backdrop-offset: 72px; /* quanto il backdrop sporge verso sinistra */
   --menu-backdrop-pad: 12px;    /* padding extra attorno al box per il backdrop */
-  --menu-backdrop-color: rgba(10,8,10,0.75); /* colore scuro del pannello sotto */
+  --menu-backdrop-color: rgba(8,8,8,1); /* OPACO: impedisce alla pulsazione di apparire dietro il menu */
 }
 
 /* =========================
@@ -77,12 +81,13 @@ body{
 /* =========================
    RADIAL RED (centro) — body::before
    - inizialmente invisibile: compare con delay, poi entra e poi pulsa
+   - rimane sotto tutti gli elementi UI importanti (z-index basso)
    ========================= */
 body::before{
   content: "";
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 0; /* assicurati che il menu abbia z-index più alto per coprirlo */
   pointer-events: none;
 
   /* radiale rosso centrale che gradua verso la trasparenza (mostra il nero di body) */
@@ -116,7 +121,7 @@ body::before{
   100% { opacity: 1; transform: scale(1); filter: brightness(1); }
 }
 
-/* pulsing sottile dopo l'entrata */
+/* pulsing sottile dopo l'entrata (resta sotto, non deve coprire il menu) */
 @keyframes bgPulse {
   0%   { transform: scale(1); filter: brightness(0.96) saturate(0.98); }
   50%  { transform: scale(1.01); filter: brightness(1.03) saturate(1.02); }
@@ -130,7 +135,7 @@ body::before{
 .bg-rain{
   position: fixed;
   inset:0;
-  z-index: 1; /* sopra body::before (z=0) */
+  z-index: 1; /* sopra body::before (z=0), sotto logo e menu */
   pointer-events: none;
   mix-blend-mode: overlay;
   filter: blur(0.25px) contrast(0.92);
@@ -222,7 +227,7 @@ body::before{
 .logo-wrapper {
   position: fixed;
   inset: 0;
-  z-index: 2; /* sopra la pioggia e la rift */
+  z-index: 2; /* sopra la pioggia e la rift, ma sotto il menu */
   display:flex;
   align-items:center;
   justify-content:center;
@@ -282,6 +287,7 @@ body::before{
 /* =========================
    SIDE MENU (posizionamento aggiornato + backdrop scuro)
    - pannello con glow, bordi arrotondati e backdrop pseudo-element
+   - menu e backdrop sono opachi per bloccare la pulsazione sottostante
    ========================= */
 .side-menu{
   position: fixed;
@@ -290,9 +296,13 @@ body::before{
   transform: translateY(-50%);
   width: var(--menu-width);
   padding: 28px;
-  z-index: 3;                   /* resta sopra il backdrop (che è pseudo-element con z-index:-1 dentro lo stacking context) */
 
-  /* sfondo e stile del pannello stesso */
+  /* IMPORTANT: alto z-index per sovrapporsi al background e a eventuali effetti */
+  z-index: 50;                   /* più alto per sicurezza */
+
+  /* sfondo e stile del pannello stesso
+     -> il gradiente usa un grigio chiaro opaco in alto e rosso scuro opaco in basso,
+        così la pulsazione sullo sfondo non sarà visibile attraverso il menu */
   background:
     linear-gradient(
       160deg,
@@ -333,11 +343,11 @@ body::before{
       transparent
     );
   filter: blur(6px);
-  opacity: 0.8;
+  opacity: 0.9;
   animation: borderPulse 6s ease-in-out infinite;
 }
 
-/* NUOVO: backdrop scuro sotto il menu, leggermente più largo e spostato a sinistra.
+/* NUOVO: backdrop scuro OPACO sotto il menu, leggermente più largo e spostato a sinistra.
    Questo pannello è creato con ::after così non serve HTML extra. */
 .side-menu::after{
   content: "";
@@ -348,7 +358,7 @@ body::before{
   width: calc(100% + var(--menu-backdrop-pad) * 2 + var(--menu-backdrop-offset));
   height: calc(100% + var(--menu-backdrop-pad) * 2);
   border-radius: calc(18px + 6px);
-  background: var(--menu-backdrop-color);
+  background: var(--menu-backdrop-color); /* OPACO: blocca la pulsazione del body::before */
   box-shadow:
     0 18px 50px rgba(0,0,0,0.65),
     0 3px 12px rgba(0,0,0,0.45) inset;
@@ -413,11 +423,16 @@ body::before{
 /* =========================
    FINE DEL FOGLIO CSS
    =========================
-   Note per debug / testing:
-   - Se, dopo aver incollato questo file, il menu non si allontana abbastanza:
-     1) fai un hard refresh della pagina (Ctrl/Cmd + Shift + R)
-     2) verifica la larghezza del viewport (F12 -> console -> window.innerWidth)
-     3) se vuoi forzarne lo spostamento ulteriormente, posso cambiare
-        --menu-right a `calc(12vw + 160px)` o aumentare il terzo termine del `max()`.
-   - Ho lasciato molte spiegazioni inline: senti libero di ridurle quando sei soddisfatto.
+   NOTE E SUGGERIMENTI:
+   1) Ho reso menu e backdrop OPACHI (alpha = 1) in modo che la pulsazione del
+      radial background non sia visibile dietro il menu. Questo è l'approccio
+      più semplice e robusto senza introdurre clipping avanzati o mask.
+   2) Se preferisci che il menu sia tutto grigio (no rosso scuro), sostituisci:
+         --menu-bg-dark: rgba(70, 70, 70, 1);
+      o imposta entrambi i --menu-bg-* su valori grigi.
+   3) Se vuoi una sola leggera sensazione di pulsazione *sul bordo esterno*
+      (es. glow che cambia), possiamo animare solo lo pseudo-elemento ::before
+      del menu (o il box-shadow) invece di lasciare la pulsazione del body.
+   4) Dopo aver incollato questo file, fai un hard refresh (Ctrl/Cmd + Shift + R)
+      per assicurarti che il browser carichi la nuova versione del CSS.
 */
