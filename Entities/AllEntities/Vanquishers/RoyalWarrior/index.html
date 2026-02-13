@@ -14,7 +14,7 @@
   <div class="rift-line main"></div>
 </div>
 
-<!-- aggiunto data-json per l'auto-init del modulo js/entity.js -->
+<!-- aggiunto data-json per l'auto-init del modulo -->
 <main class="container" role="main" aria-labelledby="entity-title" data-json="readme.json">
 
   <section class="left-col">
@@ -46,7 +46,24 @@
 
 </main>
 
-<!-- include il modulo esterno che carica readme.json e gestisce il fade dei link -->
-<script type="module" src="./js/entity.js"></script>
+<!--
+  IMPORT PRINCIPALE:
+  percorso relativo da allEntities/Vanquishers/RoyalWarrior/index.html
+  a allEntities/js/scriptjs.js -> ../../js/scriptjs.js
+-->
+<script type="module" src="../../js/scriptjs.js"></script>
+
+<!--
+  ALTERNATIVA: se il modulo esporta initEntity e vuoi inizializzare manualmente
+  (utile se readme.json sta in un posto diverso o vuoi passare opzioni):
+-->
+<!--
+<script type="module">
+  import { initEntity } from '../../js/scriptjs.js';
+  // initEntity(pathReadme, options)
+  initEntity('readme.json', { noStore: true, clickDelay: 360 });
+</script>
+-->
+
 </body>
 </html>
