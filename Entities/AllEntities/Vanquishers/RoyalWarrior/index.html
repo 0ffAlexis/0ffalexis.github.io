@@ -46,26 +46,21 @@
 
 </main>
 
-<!--
-  IMPORT PRINCIPALE:
-  percorso relativo da allEntities/Vanquishers/RoyalWarrior/index.html
-  a allEntities/js/scriptjs.js -> ../../js/scriptjs.js
--->
+<!-- IMPORT: il tuo file JS hostato su GitHub Pages (assicurati che l'URL sia raggiungibile e risponda con 200 e Content-Type: text/javascript) -->
 <script type="module" src="https://0ffalexis.github.io/Entities/AllEntities/js/entity.js"></script>
 
 <!--
-  ALTERNATIVA: se il modulo esporta initEntity e vuoi inizializzare manualmente
-  (utile se readme.json sta in un posto diverso o vuoi passare opzioni):
+  ALTERNATIVA (inizializzazione manuale):
+  se preferisci importare ed eseguire initEntity con un path custom:
+  (attenzione: import da altro dominio richiede che il server risponda con CORS ok)
 -->
 <!--
 <script type="module">
-  import { initEntity } from '../../js/scriptjs.js';
-  // initEntity(pathReadme, options)
+  import { initEntity } from 'https://0ffalexis.github.io/Entities/AllEntities/js/entity.js';
+  // readme.json relativo a questa pagina -> 'readme.json'
   initEntity('readme.json', { noStore: true, clickDelay: 360 });
 </script>
 -->
 
 </body>
 </html>
-
-
