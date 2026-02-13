@@ -14,8 +14,7 @@
   <div class="rift-line main"></div>
 </div>
 
-<!-- aggiunto data-json per l'auto-init del modulo -->
-<main class="container" role="main" aria-labelledby="entity-title" data-json="readme.json">
+<main class="container" role="main" aria-labelledby="entity-title">
 
   <section class="left-col">
     <header class="left-header">
@@ -24,7 +23,7 @@
     </header>
 
     <figure class="portrait">
-      <img id="portrait-img" class="entity-image" alt="ritratto" />
+      <img id="portrait-img" class="entity-image" />
     </figure>
 
     <div class="card card-left">
@@ -46,21 +45,176 @@
 
 </main>
 
-<!-- IMPORT: il tuo file JS hostato su GitHub Pages (assicurati che l'URL sia raggiungibile e risponda con 200 e Content-Type: text/javascript) -->
-<script type="module" src="https://0ffalexis.github.io/Entities/AllEntities/js/entity.js"></script>
+<script>
+(async function () {
 
-<!--
-  ALTERNATIVA (inizializzazione manuale):
-  se preferisci importare ed eseguire initEntity con un path custom:
-  (attenzione: import da altro dominio richiede che il server risponda con CORS ok)
--->
-<!--
-<script type="module">
-  import { initEntity } from 'https://0ffalexis.github.io/Entities/AllEntities/js/entity.js';
-  // readme.json relativo a questa pagina -> 'readme.json'
-  initEntity('readme.json', { noStore: true, clickDelay: 360 });
+  const res = await fetch('readme.json', { cache: 'no-store' });
+  if (!res.ok) throw new Error('readme.json non trovato');
+  const data = await res.json();
+
+  const $ = s => document.querySelector(s);
+
+  /* ================= META ================= */
+  $('#entity-title').textContent = data.meta.entity;
+  $('.entity-human').textContent = data.meta.humanName;
+  $('#portrait-img').src = data.meta.portrait;
+  document.title = `${data.meta.entity} — ${data.meta.humanName}`;
+
+  /* ================= LORE ================= */
+  $('#lore').textContent = data.lore || '';
+
+  /* ================= STATS ================= */
+  const statsWrap = $('#stats-list');
+  statsWrap.innerHTML = '';
+
+  for (const key of data.statsOrder) {
+    if (!(key in data.stats)) continue;
+
+    const row = document.createElement('div');
+    row.className = 'stat';
+
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = key.replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase());
+
+    const value = document.createElement('div');
+    value.className = 'value';
+    value.textContent = data.stats[key];
+
+    row.append(label, value);
+    statsWrap.appendChild(row);
+  }
+
+  /* ================= ATTACKS (Executions + Slash + future) ================= */
+  const attacksGrid = $('#attacks-grid');
+  attacksGrid.innerHTML = '';
+
+  for (const group of data.attacks) {
+
+    const col = document.createElement('div');
+    col.className = 'attacks-col';
+
+    const title = document.createElement('h3');
+    title.className = 'attack-group-title';
+    title.textContent = group.group;
+    col.appendChild(title);
+
+    for (const atk of group.items) {
+
+      const box = document.createElement('div');
+      box.className = 'attack';
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = atk.name;
+
+      const desc = document.createElement('div');
+      desc.className = 'desc muted';
+      desc.textContent = atk.desc || '';
+
+      meta.append(name, desc);
+
+      const numbers = document.createElement('div');
+      numbers.className = 'numbers';
+
+      if (atk.damage != null) {
+        const dmg = document.createElement('div');
+        dmg.className = 'dmg';
+        dmg.textContent = `Danno: ${atk.damage}`;
+        numbers.appendChild(dmg);
+      }
+
+      if (atk.energyCost != null) {
+        const en = document.createElement('div');
+        en.className = 'cost';
+        en.textContent = `Energia: ${atk.energyCost}`;
+        numbers.appendChild(en);
+      }
+
+      box.append(meta, numbers);
+      col.appendChild(box);
+    }
+
+    attacksGrid.appendChild(col);
+  }
+
+  /* ================= ABILITIES ================= */
+  const abilitiesWrap = $('#abilities-wrap');
+  abilitiesWrap.innerHTML = '';
+
+  if (data.abilities?.length) {
+
+    const title = document.createElement('h3');
+    title.className = 'attack-group-title';
+    title.textContent = 'Other Abilities';
+    abilitiesWrap.appendChild(title);
+
+    for (const ab of data.abilities) {
+
+      const box = document.createElement('div');
+      box.className = 'attack';
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = ab.name;
+
+      const desc = document.createElement('div');
+      desc.className = 'desc muted';
+      desc.textContent = ab.desc || '';
+
+      meta.append(name, desc);
+
+      const numbers = document.createElement('div');
+      numbers.className = 'numbers';
+
+      if (ab.effects) {
+        if (ab.effects.healthPercent != null) {
+          const h = document.createElement('div');
+          h.className = 'dmg';
+          h.textContent = `Health: +${ab.effects.healthPercent}%`;
+          numbers.appendChild(h);
+        }
+        if (ab.effects.energyPercent != null) {
+          const e = document.createElement('div');
+          e.className = 'cost';
+          e.textContent = `Energies: +${ab.effects.energyPercent}%`;
+          numbers.appendChild(e);
+        }
+      } else if (ab.energyCost != null) {
+        const en = document.createElement('div');
+        en.className = 'cost';
+        en.textContent = `Energia: ${ab.energyCost}`;
+        numbers.appendChild(en);
+      }
+
+      box.append(meta, numbers);
+      abilitiesWrap.appendChild(box);
+    }
+  }
+
+})();
 </script>
--->
+
+<script>
+(function(){
+  const CLICK_DELAY = 360;
+  document.querySelectorAll('a.is-link, a.back-button').forEach(a=>{
+    a.addEventListener('click', e=>{
+      const href = a.getAttribute('href');
+      if(!href || href.startsWith('#')) return;
+      e.preventDefault();
+      document.body.classList.add('page-fade-out');
+      setTimeout(()=>location.href=href, CLICK_DELAY);
+    });
+  });
+})();
+</script>
 
 </body>
 </html>
