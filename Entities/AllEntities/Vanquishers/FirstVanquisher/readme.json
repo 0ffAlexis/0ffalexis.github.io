@@ -1,11 +1,11 @@
 {
   "meta": {
-    "id": "hardwin_royal_warrior",
-    "entity": "Royal Warrior",
-    "humanName": "Hardwin",
+    "id": "hardwin_first_vanquisher",
+    "entity": "First Vanquisher",
+    "humanName": "???",
     "portrait": "entity.jpg",
     "locale": "it-IT",
-    "lastUpdated": "2026-02-03"
+    "lastUpdated": "2026-017-03"
   },
 
   "layout": {
@@ -20,12 +20,12 @@
   ],
 
   "stats": {
-    "vita": 4000,
-    "energie": 190,
-    "livelloInvisibilita": 5
+    "vita": 50000,
+    "energie": 350,
+    "livelloInvisibilita": 20
   },
 
-  "lore": "Hardwin è un guerriero d'élite della casata reale: specializzato in combattimento ravvicinato, dotato di tecniche esecutive che consumano grandi quantità di energia in cambio di danno devastante.",
+  "lore": "?",
 
   "attacks": [
     {
@@ -42,21 +42,21 @@
           "key": "exec_charged",
           "name": "Charged",
           "desc": "Execution caricato",
-          "damage": 750,
-          "energyCost": 8
+          "damage": 7000,
+          "energyCost": 5
         },
         {
-          "key": "exec_final_verdict",
-          "name": "Final Verdict",
-          "desc": "20% in più rispetto alla Charged",
-          "damage": 900,
-          "energyCost": 10
-        },
-        {
-          "key": "exec_last_judgment",
-          "name": "Last Judgment",
+          "key": "final_execution",
+          "name": "Final Execution",
           "desc": "30% in più rispetto alla Charged",
-          "damage": 975,
+          "damage": ?,
+          "energyCost": 9
+        },
+        {
+          "key": "unforgiven_execution",
+          "name": "Unforgiven Execution",
+          "desc": "60% in più rispetto alla Charged",
+          "damage": ?,
           "energyCost": 12
         }
       ]
@@ -75,22 +75,22 @@
           "key": "slash_charged",
           "name": "Charged",
           "desc": "Slash caricato",
-          "damage": 900,
-          "energyCost": 9
+          "damage": 13000,
+          "energyCost": 7
         },
         {
-          "key": "slash_end_of_mercy",
-          "name": "End Of Mercy",
-          "desc": "20% in più rispetto alla Charged",
-          "damage": 1080,
-          "energyCost": 9
+          "key": "final_slash",
+          "name": "Final Slash",
+          "desc": "40% in più rispetto alla Charged",
+          "damage": ?,
+          "energyCost": 11
         },
         {
-          "key": "slash_mercys_oblivion",
-          "name": "Mercy's Oblivion",
-          "desc": "30% in più rispetto alla Charged",
-          "damage": 1170,
-          "energyCost": 15
+          "key": "unforgiven_slash",
+          "name": "Unforgiven Slash",
+          "desc": "70% in più rispetto alla Charged",
+          "damage": ?,
+          "energyCost": 14
         }
       ]
     }
@@ -98,19 +98,14 @@
 
   "abilities": [
     {
-      "key": "switch",
-      "name": "Switch",
-      "desc": "Cambio rapido",
-      "energyCost": 10
-    },
-    {
       "key": "eternal_hope",
       "name": "Eternal Hope",
       "desc": "1 Time For Totem — ripristino",
       "effects": {
-        "healthPercent": 60,
-        "energyPercent": 60
+        "healthPercent": 80,
+        "energyPercent": 80
       }
     }
   ]
 }
+
