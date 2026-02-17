@@ -21,10 +21,8 @@ body {
     -webkit-font-smoothing:antialiased;
 }
 
-/* remove default link underline */
 a { text-decoration:none; color:inherit; }
 
-/* INITIAL B/W FADE-IN OVERLAY (stays as final state) */
 body::before{
     content:"";
     position:fixed;
@@ -38,11 +36,9 @@ body::before{
 }
 @keyframes bwFadeIn { 0% { opacity:0 } 60% { opacity:0.9 } 100% { opacity:1 } }
 
-/* PAGE FADE-OUT BEFORE NAVIGATION (micro fade) */
 body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-events:none; }
 @keyframes pageFadeOut { 0% { opacity:1; transform: scale(1) } 100% { opacity:0; transform: scale(.995); filter: blur(1px) } }
 
-/* BACK BUTTON */
 .back-button {
     position:fixed; left:18px; top:18px; z-index:20;
     display:inline-block; padding:10px 14px; border-radius:10px;
@@ -53,26 +49,22 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
 .back-button:hover{ transform:translateY(-2px); box-shadow:0 10px 26px rgba(0,0,0,0.7); }
 .back-button:focus-visible { outline:none; box-shadow:0 0 0 6px rgba(0,200,255,0.06); }
 
-/* MAIN GRID */
 .container {
     width:100%; max-width:1200px; margin:60px auto; z-index:10; display:grid;
     grid-template-columns: 420px 1fr; gap:26px; align-items:start;
     position:relative;
 }
 
-/* LEFT column */
 .left-col { display:flex; flex-direction:column; gap:16px; align-items:flex-start; }
 
-/* Title top-left with underline */
 .left-header { text-align:left; margin-left:6px; }
 .entity-title {
     color:#fff; font-size:28px; font-weight:800; letter-spacing:1px;
     margin-bottom:4px; display:inline-block; position:relative;
     padding-bottom:6px;
-    border-bottom:3px solid rgba(255,255,255,0.06); /* subtle underline */
+    border-bottom:3px solid rgba(255,255,255,0.06);
 }
 .entity-title::after{
-    /* accent small underline bar */
     content:"";
     position:absolute; left:0; bottom:-3px; height:3px; width:40%;
     background: linear-gradient(90deg, var(--accent), rgba(255,215,0,0.9));
@@ -81,7 +73,6 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
 }
 .entity-human { color:var(--muted); font-size:14px; margin-top:4px; }
 
-/* Portrait */
 .portrait { width:100%; display:flex; justify-content:center; margin-top:6px; }
 .entity-image {
     width:320px; height:320px; max-width:100%;
@@ -99,7 +90,6 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
     100% { opacity:1; transform: translateY(0) scale(1); }
 }
 
-/* stats card under image */
 .card { background: var(--card-bg); border-radius:12px; padding:16px; color:#eee; width:100%;
     border:1px solid rgba(255,255,255,0.04); box-shadow: 0 10px 28px rgba(0,0,0,0.6);
     opacity:0; transform: translateY(18px) scale(.995); animation: cardFadeIn .88s both;
@@ -114,28 +104,16 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
 .stat .label { color:var(--muted); font-weight:600; }
 .stat .value { color:#fff; }
 
-/* right column */
 .right-col { display:flex; flex-direction:column; gap:12px; align-items:stretch; }
 .card-right { animation-delay: 0.46s; }
 
-/* ATTACKS: grid with two columns for Executions & Slash */
-.attacks-grid {
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:12px;
-}
-
-/* Each attacks column */
+.attacks-grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
 .attacks-col { display:flex; flex-direction:column; gap:10px; }
-
-/* group title */
 .attack-group-title { color:#ffd38a; margin:0 0 6px 0; font-weight:800; }
 
-/* attack item */
 .attack {
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
-    border-radius:10px;
-    padding:10px;
+    border-radius:10px; padding:10px;
     border:1px solid rgba(255,255,255,0.04);
     display:flex; justify-content:space-between; align-items:center; gap:10px;
 }
@@ -146,20 +124,13 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
 .attack .numbers .dmg { color:#ffd38a; font-weight:800; }
 .attack .numbers .cost { color:#9edcf2; font-weight:700; }
 
-/* Other abilities styling kept consistent */
 .muted { color:var(--muted); font-size:13px; }
 
-/* ===== RIFF: moving diagonal line starting bottom-right -> top-left =====
-   This section positions the wrapper at the bottom-right edge of the viewport,
-   and the rift-line itself is rotated -45deg and translated across the diagonal
-   using vw/vh units so it always starts exactly at bottom-right and goes to top-left.
-*/
-
-/* wrapper anchored to bottom-right corner */
+/* ===== RIFT: gradiente oro/giallo al posto del bianco ===== */
 .rift {
     position: fixed;
-    right: 0;       /* anchored to viewport right edge */
-    bottom: 0;      /* anchored to viewport bottom edge */
+    right: 0;
+    bottom: 0;
     width: 0;
     height: 0;
     pointer-events: none;
@@ -167,37 +138,35 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
     overflow: visible;
 }
 
-/* the line itself: long enough to cross the diagonal */
 .rift-line {
     position: absolute;
-    right: 0;                /* start at the wrapper's right edge */
-    bottom: 0;               /* start at the wrapper's bottom edge */
-    width: 240vw;            /* very long so diagonal is fully covered on wide monitors */
+    right: 0;
+    bottom: 0;
+    width: 240vw;
     height: 6px;
-    transform-origin: right bottom; /* translations relative to bottom-right corner */
+    transform-origin: right bottom;
     transform: rotate(-45deg) translate(0, 0);
     background: linear-gradient(
         90deg,
         transparent,
-        #ffffff,
-        #e5e5e5,
-        #bfbfbf,
-        #e5e5e5,
-        #ffffff,
+        #b8860b,
+        #ffd700,
+        #ffe066,
+        #ffd700,
+        #b8860b,
         transparent
     );
     background-size: 300% 100%;
-    box-shadow: 0 0 30px rgba(255,255,255,0.9);
+    box-shadow: 0 0 30px rgba(255,200,0,0.85);
     filter: blur(.6px);
 
-    /* movement + shimmer */
     animation:
         riftMove 7s linear infinite,
         corruptionPulse 3.2s ease-in-out infinite;
     will-change: transform, opacity, background-position;
 }
 
-/* overlay that becomes cyan on load */
+/* overlay: oro caldo al posto del ciano */
 .rift-line::after {
     content: "";
     position: absolute;
@@ -207,9 +176,9 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
     background: linear-gradient(
         90deg,
         transparent 0%,
-        rgba(0,220,255,0.22) 18%,
-        rgba(0,180,220,0.18) 40%,
-        rgba(0,120,160,0.12) 60%,
+        rgba(255,200,0,0.22) 18%,
+        rgba(220,160,0,0.18) 40%,
+        rgba(160,110,0,0.12) 60%,
         transparent 100%
     );
     opacity: 0;
@@ -217,47 +186,37 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
     animation: riftToCyan 1.05s ease-out 0.08s forwards;
 }
 
-/* KEYFRAMES: move from bottom-right (start) to top-left (end) using vw/vh */
-/* Start: translate(0,0) means bottom-right corner. End: translate(-140vw, -140vh)
-   moves the rotated long line so that it clears past the top-left corner on all sizes. */
 @keyframes riftMove {
     0% {
         transform: rotate(-45deg) translate(0, 0);
         opacity: 0;
         background-position: 0% 50%;
     }
-    6% {
-        opacity: 1;
-    }
+    6% { opacity: 1; }
     50% {
-        /* half-way across the diagonal */
         transform: rotate(-45deg) translate(-70vw, -70vh);
         background-position: 150% 50%;
         opacity: 1;
     }
     100% {
-        /* end past top-left corner */
         transform: rotate(-45deg) translate(-140vw, -140vh);
         opacity: 0;
         background-position: 300% 50%;
     }
 }
 
-/* shimmer / background-position sweep */
 @keyframes corruptionPulse {
     0% { background-position: 0% 50%; filter: blur(.6px); }
     50% { background-position: 150% 50%; filter: blur(.9px); }
     100% { background-position: 300% 50%; filter: blur(1.2px); }
 }
 
-/* rift overlay color fade (white -> cyan wash remains) */
 @keyframes riftToCyan {
     0%   { opacity: 0; }
     60%  { opacity: 0.85; }
     100% { opacity: 1; }
 }
 
-/* responsive: stack columns on small screens */
 @media (max-width:980px){
     .container { grid-template-columns: 1fr; gap:18px; padding:18px; }
     .portrait { justify-content:center; }
