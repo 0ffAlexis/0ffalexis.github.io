@@ -1,0 +1,266 @@
+/* ===== RESET & BASE ===== */
+* { box-sizing: border-box; margin:0; padding:0; font-family: "Segoe UI", sans-serif; }
+:root{
+    --bg-1: #000;
+    --bg-2: #0f0f0f;
+    --bg-3: #2a2a2a;
+    --accent: #00d8ff;
+    --muted: #bfc3c6;
+    --card-bg: rgba(0,0,0,0.62);
+}
+html,body { height:100%; }
+body {
+    min-height:100vh;
+    background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 45%, var(--bg-3) 100%);
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:28px;
+    position:relative;
+    overflow:auto;
+    -webkit-font-smoothing:antialiased;
+}
+
+/* remove default link underline */
+a { text-decoration:none; color:inherit; }
+
+/* INITIAL B/W FADE-IN OVERLAY (stays as final state) */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.0) 45%);
+    mix-blend-mode: saturation;
+    opacity:0;
+    animation: bwFadeIn 0.95s ease-out 0.06s forwards;
+}
+@keyframes bwFadeIn { 0% { opacity:0 } 60% { opacity:0.9 } 100% { opacity:1 } }
+
+/* PAGE FADE-OUT BEFORE NAVIGATION (micro fade) */
+body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-events:none; }
+@keyframes pageFadeOut { 0% { opacity:1; transform: scale(1) } 100% { opacity:0; transform: scale(.995); filter: blur(1px) } }
+
+/* BACK BUTTON */
+.back-button {
+    position:fixed; left:18px; top:18px; z-index:20;
+    display:inline-block; padding:10px 14px; border-radius:10px;
+    background: linear-gradient(145deg,#0f0f0f,#2a2a2a);
+    color:#eee; border:1px solid rgba(255,255,255,0.06); font-weight:700;
+    box-shadow:0 6px 18px rgba(0,0,0,0.6); transition: transform .14s, box-shadow .14s;
+}
+.back-button:hover{ transform:translateY(-2px); box-shadow:0 10px 26px rgba(0,0,0,0.7); }
+.back-button:focus-visible { outline:none; box-shadow:0 0 0 6px rgba(0,200,255,0.06); }
+
+/* MAIN GRID */
+.container {
+    width:100%; max-width:1200px; margin:60px auto; z-index:10; display:grid;
+    grid-template-columns: 420px 1fr; gap:26px; align-items:start;
+    position:relative;
+}
+
+/* LEFT column */
+.left-col { display:flex; flex-direction:column; gap:16px; align-items:flex-start; }
+
+/* Title top-left with underline */
+.left-header { text-align:left; margin-left:6px; }
+.entity-title {
+    color:#fff; font-size:28px; font-weight:800; letter-spacing:1px;
+    margin-bottom:4px; display:inline-block; position:relative;
+    padding-bottom:6px;
+    border-bottom:3px solid rgba(255,255,255,0.06); /* subtle underline */
+}
+.entity-title::after{
+    /* accent small underline bar */
+    content:"";
+    position:absolute; left:0; bottom:-3px; height:3px; width:40%;
+    background: linear-gradient(90deg, var(--accent), rgba(255,215,0,0.9));
+    opacity:0.95;
+    transform-origin:left center;
+}
+.entity-human { color:var(--muted); font-size:14px; margin-top:4px; }
+
+/* Portrait */
+.portrait { width:100%; display:flex; justify-content:center; margin-top:6px; }
+.entity-image {
+    width:320px; height:320px; max-width:100%;
+    border-radius:12px; object-fit:cover; display:block;
+    border: 4px solid rgba(255,255,255,0.04);
+    box-shadow: 0 18px 46px rgba(0,0,0,0.6), 0 0 26px rgba(0,0,0,0.45);
+    background: linear-gradient(180deg,#222,#111);
+    opacity:0; transform: translateY(18px) scale(.98);
+    transition: transform .36s cubic-bezier(.2,.9,.3,1), opacity .36s;
+    animation: imageFadeIn .92s cubic-bezier(.22,.9,.32,1) 0.12s forwards;
+}
+@keyframes imageFadeIn {
+    0% { opacity:0; transform: translateY(18px) scale(.98); }
+    60% { opacity:1; transform: translateY(-6px) scale(1.02); }
+    100% { opacity:1; transform: translateY(0) scale(1); }
+}
+
+/* stats card under image */
+.card { background: var(--card-bg); border-radius:12px; padding:16px; color:#eee; width:100%;
+    border:1px solid rgba(255,255,255,0.04); box-shadow: 0 10px 28px rgba(0,0,0,0.6);
+    opacity:0; transform: translateY(18px) scale(.995); animation: cardFadeIn .88s both;
+}
+.card-left { animation-delay: 0.26s; }
+.card-title { color:#fff; font-size:18px; margin-bottom:10px; }
+.card-subtitle { color:#fff; margin:6px 0 8px 0; }
+@keyframes cardFadeIn { 0% { opacity:0; transform: translateY(18px) scale(.995) } 60% { opacity:1; transform: translateY(-6px) scale(1.01) } 100% { opacity:1; transform: translateY(0) scale(1) } }
+
+.stats-list { display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
+.stat { display:flex; justify-content:space-between; gap:12px; font-weight:700; color:#f4f7f9; }
+.stat .label { color:var(--muted); font-weight:600; }
+.stat .value { color:#fff; }
+
+/* right column */
+.right-col { display:flex; flex-direction:column; gap:12px; align-items:stretch; }
+.card-right { animation-delay: 0.46s; }
+
+/* ATTACKS: grid with two columns for Executions & Slash */
+.attacks-grid {
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:12px;
+}
+
+/* Each attacks column */
+.attacks-col { display:flex; flex-direction:column; gap:10px; }
+
+/* group title */
+.attack-group-title { color:#ffd38a; margin:0 0 6px 0; font-weight:800; }
+
+/* attack item */
+.attack {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
+    border-radius:10px;
+    padding:10px;
+    border:1px solid rgba(255,255,255,0.04);
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+}
+.attack .meta { display:flex; flex-direction:column; gap:4px; }
+.attack .meta .name { font-weight:800; color:#fff; }
+.attack .meta .desc { color:var(--muted); font-size:13px; }
+.attack .numbers { display:flex; flex-direction:column; align-items:flex-end; gap:4px; min-width:110px; }
+.attack .numbers .dmg { color:#ffd38a; font-weight:800; }
+.attack .numbers .cost { color:#9edcf2; font-weight:700; }
+
+/* Other abilities styling kept consistent */
+.muted { color:var(--muted); font-size:13px; }
+
+/* ===== RIFF: moving diagonal line starting bottom-right -> top-left =====
+   This section positions the wrapper at the bottom-right edge of the viewport,
+   and the rift-line itself is rotated -45deg and translated across the diagonal
+   using vw/vh units so it always starts exactly at bottom-right and goes to top-left.
+*/
+
+/* wrapper anchored to bottom-right corner */
+.rift {
+    position: fixed;
+    right: 0;       /* anchored to viewport right edge */
+    bottom: 0;      /* anchored to viewport bottom edge */
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible;
+}
+
+/* the line itself: long enough to cross the diagonal */
+.rift-line {
+    position: absolute;
+    right: 0;                /* start at the wrapper's right edge */
+    bottom: 0;               /* start at the wrapper's bottom edge */
+    width: 240vw;            /* very long so diagonal is fully covered on wide monitors */
+    height: 6px;
+    transform-origin: right bottom; /* translations relative to bottom-right corner */
+    transform: rotate(-45deg) translate(0, 0);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #ffffff,
+        #e5e5e5,
+        #bfbfbf,
+        #e5e5e5,
+        #ffffff,
+        transparent
+    );
+    background-size: 300% 100%;
+    box-shadow: 0 0 30px rgba(255,255,255,0.9);
+    filter: blur(.6px);
+
+    /* movement + shimmer */
+    animation:
+        riftMove 7s linear infinite,
+        corruptionPulse 3.2s ease-in-out infinite;
+    will-change: transform, opacity, background-position;
+}
+
+/* overlay that becomes cyan on load */
+.rift-line::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(0,220,255,0.22) 18%,
+        rgba(0,180,220,0.18) 40%,
+        rgba(0,120,160,0.12) 60%,
+        transparent 100%
+    );
+    opacity: 0;
+    mix-blend-mode: screen;
+    animation: riftToCyan 1.05s ease-out 0.08s forwards;
+}
+
+/* KEYFRAMES: move from bottom-right (start) to top-left (end) using vw/vh */
+/* Start: translate(0,0) means bottom-right corner. End: translate(-140vw, -140vh)
+   moves the rotated long line so that it clears past the top-left corner on all sizes. */
+@keyframes riftMove {
+    0% {
+        transform: rotate(-45deg) translate(0, 0);
+        opacity: 0;
+        background-position: 0% 50%;
+    }
+    6% {
+        opacity: 1;
+    }
+    50% {
+        /* half-way across the diagonal */
+        transform: rotate(-45deg) translate(-70vw, -70vh);
+        background-position: 150% 50%;
+        opacity: 1;
+    }
+    100% {
+        /* end past top-left corner */
+        transform: rotate(-45deg) translate(-140vw, -140vh);
+        opacity: 0;
+        background-position: 300% 50%;
+    }
+}
+
+/* shimmer / background-position sweep */
+@keyframes corruptionPulse {
+    0% { background-position: 0% 50%; filter: blur(.6px); }
+    50% { background-position: 150% 50%; filter: blur(.9px); }
+    100% { background-position: 300% 50%; filter: blur(1.2px); }
+}
+
+/* rift overlay color fade (white -> cyan wash remains) */
+@keyframes riftToCyan {
+    0%   { opacity: 0; }
+    60%  { opacity: 0.85; }
+    100% { opacity: 1; }
+}
+
+/* responsive: stack columns on small screens */
+@media (max-width:980px){
+    .container { grid-template-columns: 1fr; gap:18px; padding:18px; }
+    .portrait { justify-content:center; }
+    .entity-image { width:260px; height:260px; }
+    .attacks-grid { grid-template-columns: 1fr; }
+}
