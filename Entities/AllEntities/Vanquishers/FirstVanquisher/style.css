@@ -130,8 +130,8 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
 
 .attacks-col { display:flex; flex-direction:column; gap:10px; }
 
-/* group title — cambiato da arancio/giallo a azzurro vivace */
-.attack-group-title { color:#48cae4; margin:0 0 6px 0; font-weight:800; }
+/* group title — colore originale */
+.attack-group-title { color:#ffd38a; margin:0 0 6px 0; font-weight:800; }
 
 /* attack item */
 .attack {
@@ -145,10 +145,10 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
 .attack .meta .name { font-weight:800; color:#caf0f8; }
 .attack .meta .desc { color:var(--muted); font-size:13px; }
 .attack .numbers { display:flex; flex-direction:column; align-items:flex-end; gap:4px; min-width:110px; }
-/* dmg: azzurro intenso al posto del giallo */
-.attack .numbers .dmg { color:#48cae4; font-weight:800; }
-/* cost: azzurro più chiaro/ghiaccio */
-.attack .numbers .cost { color:#ade8f4; font-weight:700; }
+/* dmg: giallo originale */
+.attack .numbers .dmg { color:#ffd38a; font-weight:800; }
+/* cost: azzurro originale */
+.attack .numbers .cost { color:#9edcf2; font-weight:700; }
 
 .muted { color:var(--muted); font-size:13px; }
 
@@ -172,19 +172,19 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
     height: 6px;
     transform-origin: right bottom;
     transform: rotate(-45deg) translate(0, 0);
-    /* rimpiazziamo il bianco/grigio con sfumature blu/ciano */
+    /* gradiente originale bianco/grigio */
     background: linear-gradient(
         90deg,
         transparent,
-        #0077b6,
-        #00b4d8,
-        #48cae4,
-        #00b4d8,
-        #0077b6,
+        #ffffff,
+        #e5e5e5,
+        #bfbfbf,
+        #e5e5e5,
+        #ffffff,
         transparent
     );
     background-size: 300% 100%;
-    box-shadow: 0 0 30px rgba(0,180,216,0.85);
+    box-shadow: 0 0 30px rgba(255,255,255,0.9);
     filter: blur(.6px);
 
     animation:
@@ -202,9 +202,9 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
     background: linear-gradient(
         90deg,
         transparent 0%,
-        rgba(0,180,216,0.32) 18%,
-        rgba(0,119,182,0.25) 40%,
-        rgba(0,80,140,0.16) 60%,
+        rgba(0,220,255,0.22) 18%,
+        rgba(0,180,220,0.18) 40%,
+        rgba(0,120,160,0.12) 60%,
         transparent 100%
     );
     opacity: 0;
