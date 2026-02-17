@@ -1,12 +1,12 @@
 /* ===== RESET & BASE ===== */
 * { box-sizing: border-box; margin:0; padding:0; font-family: "Segoe UI", sans-serif; }
 :root{
-    --bg-1: #000;
-    --bg-2: #0f0f0f;
-    --bg-3: #2a2a2a;
-    --accent: #00d8ff;
-    --muted: #bfc3c6;
-    --card-bg: rgba(0,0,0,0.62);
+    --bg-1: #0a0800;
+    --bg-2: #1a1200;
+    --bg-3: #2e2000;
+    --accent: #c9920a;
+    --muted: #c4a96e;
+    --card-bg: rgba(20,14,0,0.72);
 }
 html,body { height:100%; }
 body {
@@ -21,24 +21,23 @@ body {
     -webkit-font-smoothing:antialiased;
 }
 
-/* remove default link underline */
 a { text-decoration:none; color:inherit; }
 
-/* INITIAL B/W FADE-IN OVERLAY (stays as final state) */
+/* INITIAL FADE-IN OVERLAY */
 body::before{
     content:"";
     position:fixed;
     inset:0;
     z-index:0;
     pointer-events:none;
-    background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.0) 45%);
+    background: linear-gradient(180deg, rgba(200,150,0,0.07) 0%, rgba(0,0,0,0.0) 45%);
     mix-blend-mode: saturation;
     opacity:0;
     animation: bwFadeIn 0.95s ease-out 0.06s forwards;
 }
 @keyframes bwFadeIn { 0% { opacity:0 } 60% { opacity:0.9 } 100% { opacity:1 } }
 
-/* PAGE FADE-OUT BEFORE NAVIGATION (micro fade) */
+/* PAGE FADE-OUT */
 body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-events:none; }
 @keyframes pageFadeOut { 0% { opacity:1; transform: scale(1) } 100% { opacity:0; transform: scale(.995); filter: blur(1px) } }
 
@@ -46,12 +45,12 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
 .back-button {
     position:fixed; left:18px; top:18px; z-index:20;
     display:inline-block; padding:10px 14px; border-radius:10px;
-    background: linear-gradient(145deg,#0f0f0f,#2a2a2a);
-    color:#eee; border:1px solid rgba(255,255,255,0.06); font-weight:700;
+    background: linear-gradient(145deg, #1a1200, #2e2000);
+    color:#f5e2a0; border:1px solid rgba(200,160,0,0.14); font-weight:700;
     box-shadow:0 6px 18px rgba(0,0,0,0.6); transition: transform .14s, box-shadow .14s;
 }
-.back-button:hover{ transform:translateY(-2px); box-shadow:0 10px 26px rgba(0,0,0,0.7); }
-.back-button:focus-visible { outline:none; box-shadow:0 0 0 6px rgba(0,200,255,0.06); }
+.back-button:hover{ transform:translateY(-2px); box-shadow:0 10px 26px rgba(120,80,0,0.45); }
+.back-button:focus-visible { outline:none; box-shadow:0 0 0 6px rgba(200,150,0,0.10); }
 
 /* MAIN GRID */
 .container {
@@ -63,19 +62,18 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
 /* LEFT column */
 .left-col { display:flex; flex-direction:column; gap:16px; align-items:flex-start; }
 
-/* Title top-left with underline */
+/* Title */
 .left-header { text-align:left; margin-left:6px; }
 .entity-title {
-    color:#fff; font-size:28px; font-weight:800; letter-spacing:1px;
+    color:#f5e2a0; font-size:28px; font-weight:800; letter-spacing:1px;
     margin-bottom:4px; display:inline-block; position:relative;
     padding-bottom:6px;
-    border-bottom:3px solid rgba(255,255,255,0.06); /* subtle underline */
+    border-bottom:3px solid rgba(200,160,0,0.12);
 }
 .entity-title::after{
-    /* accent small underline bar */
     content:"";
     position:absolute; left:0; bottom:-3px; height:3px; width:40%;
-    background: linear-gradient(90deg, var(--accent), rgba(255,215,0,0.9));
+    background: linear-gradient(90deg, #c9920a, #ffe066);
     opacity:0.95;
     transform-origin:left center;
 }
@@ -86,9 +84,9 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
 .entity-image {
     width:320px; height:320px; max-width:100%;
     border-radius:12px; object-fit:cover; display:block;
-    border: 4px solid rgba(255,255,255,0.04);
-    box-shadow: 0 18px 46px rgba(0,0,0,0.6), 0 0 26px rgba(0,0,0,0.45);
-    background: linear-gradient(180deg,#222,#111);
+    border: 4px solid rgba(200,160,0,0.10);
+    box-shadow: 0 18px 46px rgba(0,0,0,0.7), 0 0 32px rgba(120,80,0,0.28);
+    background: linear-gradient(180deg, #1a1200, #0a0800);
     opacity:0; transform: translateY(18px) scale(.98);
     transition: transform .36s cubic-bezier(.2,.9,.3,1), opacity .36s;
     animation: imageFadeIn .92s cubic-bezier(.22,.9,.32,1) 0.12s forwards;
@@ -99,67 +97,62 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
     100% { opacity:1; transform: translateY(0) scale(1); }
 }
 
-/* stats card under image */
-.card { background: var(--card-bg); border-radius:12px; padding:16px; color:#eee; width:100%;
-    border:1px solid rgba(255,255,255,0.04); box-shadow: 0 10px 28px rgba(0,0,0,0.6);
+/* cards */
+.card {
+    background: var(--card-bg); border-radius:12px; padding:16px; color:#f0dcaa; width:100%;
+    border:1px solid rgba(200,160,0,0.08); box-shadow: 0 10px 28px rgba(0,0,0,0.6);
     opacity:0; transform: translateY(18px) scale(.995); animation: cardFadeIn .88s both;
 }
 .card-left { animation-delay: 0.26s; }
-.card-title { color:#fff; font-size:18px; margin-bottom:10px; }
-.card-subtitle { color:#fff; margin:6px 0 8px 0; }
+.card-title { color:#f5e2a0; font-size:18px; margin-bottom:10px; }
+.card-subtitle { color:#f5e2a0; margin:6px 0 8px 0; }
 @keyframes cardFadeIn { 0% { opacity:0; transform: translateY(18px) scale(.995) } 60% { opacity:1; transform: translateY(-6px) scale(1.01) } 100% { opacity:1; transform: translateY(0) scale(1) } }
 
 .stats-list { display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
-.stat { display:flex; justify-content:space-between; gap:12px; font-weight:700; color:#f4f7f9; }
+.stat { display:flex; justify-content:space-between; gap:12px; font-weight:700; color:#f0dcaa; }
 .stat .label { color:var(--muted); font-weight:600; }
-.stat .value { color:#fff; }
+.stat .value { color:#f5e2a0; }
 
 /* right column */
 .right-col { display:flex; flex-direction:column; gap:12px; align-items:stretch; }
 .card-right { animation-delay: 0.46s; }
 
-/* ATTACKS: grid with two columns for Executions & Slash */
+/* ATTACKS */
 .attacks-grid {
     display:grid;
     grid-template-columns: 1fr 1fr;
     gap:12px;
 }
-
-/* Each attacks column */
 .attacks-col { display:flex; flex-direction:column; gap:10px; }
 
-/* group title */
+/* group title — originale giallo */
 .attack-group-title { color:#ffd38a; margin:0 0 6px 0; font-weight:800; }
 
 /* attack item */
 .attack {
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
+    background: linear-gradient(180deg, rgba(200,150,0,0.04), rgba(0,0,0,0.20));
     border-radius:10px;
     padding:10px;
-    border:1px solid rgba(255,255,255,0.04);
+    border:1px solid rgba(200,160,0,0.08);
     display:flex; justify-content:space-between; align-items:center; gap:10px;
 }
 .attack .meta { display:flex; flex-direction:column; gap:4px; }
-.attack .meta .name { font-weight:800; color:#fff; }
+.attack .meta .name { font-weight:800; color:#f5e2a0; }
 .attack .meta .desc { color:var(--muted); font-size:13px; }
 .attack .numbers { display:flex; flex-direction:column; align-items:flex-end; gap:4px; min-width:110px; }
+/* originali invariati */
 .attack .numbers .dmg { color:#ffd38a; font-weight:800; }
 .attack .numbers .cost { color:#9edcf2; font-weight:700; }
 
-/* Other abilities styling kept consistent */
 .muted { color:var(--muted); font-size:13px; }
 
-/* ===== RIFF: moving diagonal line starting bottom-right -> top-left =====
-   This section positions the wrapper at the bottom-right edge of the viewport,
-   and the rift-line itself is rotated -45deg and translated across the diagonal
-   using vw/vh units so it always starts exactly at bottom-right and goes to top-left.
+/* ===== RIFT =====
+   Nero/antracite al posto del bianco/grigio, overlay nero al posto del ciano
 */
-
-/* wrapper anchored to bottom-right corner */
 .rift {
     position: fixed;
-    right: 0;       /* anchored to viewport right edge */
-    bottom: 0;      /* anchored to viewport bottom edge */
+    right: 0;
+    bottom: 0;
     width: 0;
     height: 0;
     pointer-events: none;
@@ -167,37 +160,35 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
     overflow: visible;
 }
 
-/* the line itself: long enough to cross the diagonal */
 .rift-line {
     position: absolute;
-    right: 0;                /* start at the wrapper's right edge */
-    bottom: 0;               /* start at the wrapper's bottom edge */
-    width: 240vw;            /* very long so diagonal is fully covered on wide monitors */
+    right: 0;
+    bottom: 0;
+    width: 240vw;
     height: 6px;
-    transform-origin: right bottom; /* translations relative to bottom-right corner */
+    transform-origin: right bottom;
     transform: rotate(-45deg) translate(0, 0);
     background: linear-gradient(
         90deg,
         transparent,
-        #ffffff,
-        #e5e5e5,
-        #bfbfbf,
-        #e5e5e5,
-        #ffffff,
+        #1a1200,
+        #0a0800,
+        #000000,
+        #0a0800,
+        #1a1200,
         transparent
     );
     background-size: 300% 100%;
-    box-shadow: 0 0 30px rgba(255,255,255,0.9);
+    box-shadow: 0 0 30px rgba(0,0,0,0.98);
     filter: blur(.6px);
 
-    /* movement + shimmer */
     animation:
         riftMove 7s linear infinite,
         corruptionPulse 3.2s ease-in-out infinite;
     will-change: transform, opacity, background-position;
 }
 
-/* overlay that becomes cyan on load */
+/* overlay nero scuro al posto del ciano */
 .rift-line::after {
     content: "";
     position: absolute;
@@ -207,57 +198,48 @@ body.page-fade-out { animation: pageFadeOut .36s ease-in forwards; pointer-event
     background: linear-gradient(
         90deg,
         transparent 0%,
-        rgba(0,220,255,0.22) 18%,
-        rgba(0,180,220,0.18) 40%,
-        rgba(0,120,160,0.12) 60%,
+        rgba(0,0,0,0.55) 18%,
+        rgba(5,3,0,0.45) 40%,
+        rgba(10,8,0,0.30) 60%,
         transparent 100%
     );
     opacity: 0;
-    mix-blend-mode: screen;
+    mix-blend-mode: multiply;
     animation: riftToCyan 1.05s ease-out 0.08s forwards;
 }
 
-/* KEYFRAMES: move from bottom-right (start) to top-left (end) using vw/vh */
-/* Start: translate(0,0) means bottom-right corner. End: translate(-140vw, -140vh)
-   moves the rotated long line so that it clears past the top-left corner on all sizes. */
 @keyframes riftMove {
     0% {
         transform: rotate(-45deg) translate(0, 0);
         opacity: 0;
         background-position: 0% 50%;
     }
-    6% {
-        opacity: 1;
-    }
+    6% { opacity: 1; }
     50% {
-        /* half-way across the diagonal */
         transform: rotate(-45deg) translate(-70vw, -70vh);
         background-position: 150% 50%;
         opacity: 1;
     }
     100% {
-        /* end past top-left corner */
         transform: rotate(-45deg) translate(-140vw, -140vh);
         opacity: 0;
         background-position: 300% 50%;
     }
 }
 
-/* shimmer / background-position sweep */
 @keyframes corruptionPulse {
     0% { background-position: 0% 50%; filter: blur(.6px); }
     50% { background-position: 150% 50%; filter: blur(.9px); }
     100% { background-position: 300% 50%; filter: blur(1.2px); }
 }
 
-/* rift overlay color fade (white -> cyan wash remains) */
 @keyframes riftToCyan {
     0%   { opacity: 0; }
     60%  { opacity: 0.85; }
     100% { opacity: 1; }
 }
 
-/* responsive: stack columns on small screens */
+/* responsive */
 @media (max-width:980px){
     .container { grid-template-columns: 1fr; gap:18px; padding:18px; }
     .portrait { justify-content:center; }
