@@ -30,28 +30,28 @@
           "key": "exec_instant",
           "name": "Instant",
           "desc": "Execution - colpo immediato",
-          "damage": 500,
+          "damage": null,
           "energyCost": 5
         },
         {
-          "key": "exec_charged",
-          "name": "Charged",
+          "key": "execution",
+          "name": "Execution",
           "desc": "Execution caricato",
-          "damage": 750,
-          "energyCost": 8
+          "damage": 7000,
+          "energyCost": 5
         },
         {
-          "key": "exec_final_verdict",
-          "name": "Final Verdict",
-          "desc": "20% in più rispetto alla Charged",
-          "damage": 900,
-          "energyCost": 10
+          "key": "final_execution",
+          "name": "Final Execution",
+          "desc": "30% in più rispetto alla Execution",
+          "damage": 9100,
+          "energyCost": 9
         },
         {
-          "key": "exec_last_judgment",
-          "name": "Last Judgment",
-          "desc": "30% in più rispetto alla Charged",
-          "damage": 975,
+          "key": "unforgiven_execution",
+          "name": "Unforgiven Execution",
+          "desc": "60% in più rispetto alla Execution",
+          "damage": 11200,
           "energyCost": 12
         }
       ]
@@ -63,29 +63,29 @@
           "key": "slash_instant",
           "name": "Instant",
           "desc": "Slash - colpo rapido",
-          "damage": 600,
+          "damage": null,
           "energyCost": 7
         },
         {
-          "key": "slash_charged",
-          "name": "Charged",
+          "key": "slash",
+          "name": "Slash",
           "desc": "Slash caricato",
-          "damage": 900,
-          "energyCost": 9
+          "damage": 13000,
+          "energyCost": 7
         },
         {
-          "key": "slash_end_of_mercy",
-          "name": "End Of Mercy",
-          "desc": "20% in più rispetto alla Charged",
-          "damage": 1080,
-          "energyCost": 9
+          "key": "final_slash",
+          "name": "Final Slash",
+          "desc": "40% in più rispetto alla Slash",
+          "damage": 18200,
+          "energyCost": 11
         },
         {
-          "key": "slash_mercys_oblivion",
-          "name": "Mercy's Oblivion",
-          "desc": "30% in più rispetto alla Charged",
-          "damage": 1170,
-          "energyCost": 15
+          "key": "unforgiven_slash",
+          "name": "Unforgiven Slash",
+          "desc": "70% in più rispetto alla Slash",
+          "damage": 22100,
+          "energyCost": 14
         }
       ]
     }
